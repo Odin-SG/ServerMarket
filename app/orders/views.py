@@ -18,7 +18,6 @@ bp = Blueprint('orders', __name__, url_prefix='/orders')
 @bp.route('/')
 @login_required
 def index():
-    print("123")
     orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
     return render_template('orders/index.html', orders=orders)
 
@@ -42,7 +41,7 @@ def new_order():
             user_id=current_user.id,
             configuration=ConfigurationType[form.configuration.data],
             contact_info={'text': form.contact_info.data},
-            total_price=0  # заполним ниже
+            total_price=0
         )
         total = 0
         for item_form in form.items.entries:

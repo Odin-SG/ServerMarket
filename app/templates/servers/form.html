@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} сервер{% endblock %}
+{% block content %}
+  <h1>{{ action }} сервер</h1>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div>
+      {{ form.model_name.label }}<br>{{ form.model_name() }}
+    </div>
+    <div>
+      {{ form.slug.label }}<br>{{ form.slug() }}
+    </div>
+    <div>
+      {{ form.description.label }}<br>{{ form.description(rows=5) }}
+    </div>
+    <div>
+      {{ form.price.label }}<br>{{ form.price() }}
+    </div>
+    <div>
+      {{ form.specifications.label }}<br>{{ form.specifications(rows=4) }}
+    </div>
+    <div>
+      {{ form.image_url.label }}<br>{{ form.image_url() }}
+    </div>
+    <div>
+      {{ form.is_available() }} {{ form.is_available.label }}
+    </div>
+    <div>
+      {{ form.submit() }}
+    </div>
+  </form>
+  <p><a href="{{ url_for('servers.index') }}">← Вернуться к каталогу</a></p>
+{% endblock %}

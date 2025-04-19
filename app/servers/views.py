@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
+import json
 from sqlalchemy.exc import SQLAlchemyError
 from app import db
 from app.models.server import Server
@@ -22,7 +23,6 @@ def detail(slug):
 
 @bp.route('/<slug>/info')
 def info(slug):
-    # API для модального окна
     server = Server.query.filter_by(slug=slug, is_available=True).first_or_404()
     return jsonify({
         'id': server.id,
@@ -33,7 +33,6 @@ def info(slug):
     })
 
 
-# Админ-CRUD (только для ADMIN)
 @bp.route('/admin/new', methods=['GET', 'POST'])
 @login_required
 def create():

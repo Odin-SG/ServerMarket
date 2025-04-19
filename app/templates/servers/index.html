@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Каталог серверов{% endblock %}
+{% block content %}
+  <h1>Каталог серверов</h1>
+  <div class="server-list">
+    {% for server in servers %}
+      <div class="server-card">
+        <h3><a href="{{ url_for('servers.detail', slug=server.slug) }}">{{ server.model_name }}</a></h3>
+        {% if server.image_url %}
+          <img src="{{ server.image_url }}" alt="{{ server.model_name }}" width="200">
+        {% endif %}
+        <p>{{ server.description[:150] }}{% if server.description|length > 150 %}...{% endif %}</p>
+        <p><strong>Цена:</strong> {{ '{:.2f}'.format(server.price) }} ₽</p>
+        <button data-slug="{{ server.slug }}" class="btn-info" onclick="loadInfo('{{ server.slug }}')">Подробнее</button>
+      </div>
+    {% endfor %}
+  </div>
+  <!-- Модальное окно -->
+  <div id="serverModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+{% endblock %}

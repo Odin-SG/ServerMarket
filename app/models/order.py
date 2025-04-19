@@ -28,7 +28,6 @@ class Order(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Связь с позициями заказа
     items = db.relationship('OrderItem', backref='order', cascade='all, delete-orphan', lazy='joined')
 
 class OrderItem(db.Model):
@@ -40,5 +39,4 @@ class OrderItem(db.Model):
     quantity = db.Column(db.Integer, default=1, nullable=False)
     unit_price = db.Column(db.Numeric(12,2), nullable=False)
 
-    # Сервер можно загрузить при необходимости
     server = db.relationship('Server')
