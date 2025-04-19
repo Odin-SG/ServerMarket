@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
   <h1>Добро пожаловать в A-STOR Магазин</h1>
+
+  <p>Всего зарегистрированных пользователей: {{ total_users }}</p>
+
   {% if current_user.is_authenticated %}
     <p>Вы вошли как {{ current_user.username }}.</p>
   {% else %}

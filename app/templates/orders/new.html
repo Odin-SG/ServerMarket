@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Создать заказ{% endblock %}
+
+{% block content %}
+  <h2>Новый заказ</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div>
+      {{ form.configuration.label }}<br>
+      {{ form.configuration() }}
+    </div>
+
+    {% for idx, item in enumerate(form.items) %}
+      <fieldset>
+        <legend>Позиция {{ idx + 1 }}</legend>
+        <div>
+          {{ item.server_id.label }}<br>
+          {{ item.server_id() }}
+        </div>
+        <div>
+          {{ item.quantity.label }}<br>
+          {{ item.quantity() }}
+        </div>
+      </fieldset>
+    {% endfor %}
+
+    <div>
+      {{ form.contact_info.label }}<br>
+      {{ form.contact_info(rows=4) }}
+    </div>
+
+    <div>
+      {{ form.submit() }}
+    </div>
+  </form>
+{% endblock %}
