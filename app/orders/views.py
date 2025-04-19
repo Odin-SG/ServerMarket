@@ -13,16 +13,16 @@ config_slots_map = {
     ConfigurationType.LARGE: 8,
 }
 
-order_bp = Blueprint('orders', __name__, url_prefix='/orders')
+bp = Blueprint('orders', __name__, url_prefix='/orders')
 
-@order_bp.route('/')
+@bp.route('/')
 @login_required
 def index():
     print("123")
     orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
     return render_template('orders/index.html', orders=orders)
 
-@order_bp.route('/new', methods=['GET', 'POST'])
+@bp.route('/new', methods=['GET', 'POST'])
 @login_required
 def new_order():
     form = OrderForm()
@@ -70,7 +70,7 @@ def new_order():
 
     return render_template('orders/new.html', form=form)
 
-@order_bp.route('/<int:order_id>')
+@bp.route('/<int:order_id>')
 @login_required
 def show(order_id):
     order = Order.query.get_or_404(order_id)

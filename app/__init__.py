@@ -51,6 +51,8 @@ def create_app(config_class='app.config.Config'):
     app.register_blueprint(auth_bp)
     from app.orders.views import bp as order_bp
     app.register_blueprint(order_bp)
+    from app.servers.views import bp as servers_bp
+    app.register_blueprint(servers_bp)
 
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):
