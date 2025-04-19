@@ -1,11 +1,9 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>A-STOR Shop</title>
-  </head>
-  <body>
-    <h1>Hello, A-STOR Shop with PostgreSQL!</h1>
-    <p>Минимально работающий шаблон.</p>
-  </body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Добро пожаловать в A-STOR Магазин</h1>
+  {% if current_user.is_authenticated %}
+    <p>Вы вошли как {{ current_user.username }}.</p>
+  {% else %}
+    <p>Пожалуйста, <a href="{{ url_for('auth.login') }}">войдите</a> или <a href="{{ url_for('auth.register') }}">зарегистрируйтесь</a>.</p>
+  {% endif %}
+{% endblock %}
