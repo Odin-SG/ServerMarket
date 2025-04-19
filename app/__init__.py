@@ -12,7 +12,6 @@ login_manager = LoginManager()
 ma = Marshmallow()
 socketio = SocketIO()
 
-
 def create_app(config_class='app.config.Config'):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -24,7 +23,10 @@ def create_app(config_class='app.config.Config'):
     ma.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*")
 
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = 'main.login'
     login_manager.login_message = 'Пожалуйста, войдите для доступа к этой странице.'
+
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
 
     return app
