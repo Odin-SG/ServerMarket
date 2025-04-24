@@ -33,7 +33,7 @@ class User(db.Model, UserMixin):
     last_login_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    #orders = db.relationship('Order', backref='user', lazy='dynamic')
+    orders = db.relationship('Order', backref='user', lazy='dynamic')
     #chat_messages = db.relationship('ChatMessage', backref='author', lazy='dynamic')
 
     def __repr__(self):

@@ -11,9 +11,9 @@
       {{ form.configuration() }}
     </div>
 
-    {% for idx, item in enumerate(form.items) %}
+    {% for item in form.items %}
       <fieldset>
-        <legend>Позиция {{ idx + 1 }}</legend>
+        <legend>Позиция {{ loop.index }}</legend>
         <div>
           {{ item.server_id.label }}<br>
           {{ item.server_id() }}

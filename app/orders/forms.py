@@ -6,6 +6,8 @@ from app.models.server import Server
 
 
 class OrderItemForm(FlaskForm):
+    class Meta:
+        csrf = False
     server_id = SelectField('Сервер', coerce=int, validators=[DataRequired()])
     quantity = IntegerField('Количество', default=1,
                             validators=[DataRequired(), NumberRange(min=1, max=10)])

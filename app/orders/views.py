@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from app import db
@@ -15,26 +15,47 @@ config_slots_map = {
 
 bp = Blueprint('orders', __name__, url_prefix='/orders')
 
+
 @bp.route('/')
 @login_required
 def index():
     orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
     return render_template('orders/index.html', orders=orders)
 
+
 @bp.route('/new', methods=['GET', 'POST'])
 @login_required
 def new_order():
+    default_server_id = request.args.get('server_id', type=int)
     form = OrderForm()
 
     servers = Server.query.filter_by(is_available=True).all()
     choices = [(s.id, s.model_name) for s in servers]
-    for subform in form.items:
-        subform.server_id.choices = choices
 
     if request.method == 'POST':
-        config = ConfigurationType[form.configuration.data]
-        form.items.min_entries = config_slots_map[config]
-        form.items.entries = form.items.entries[:config_slots_map[config]]
+        try:
+            config = ConfigurationType[form.configuration.data]
+            slots = config_slots_map[config]
+        except (KeyError, TypeError):
+            slots = 1
+
+        form.items.min_entries = slots
+
+        while len(form.items.entries) < slots:
+            form.items.append_entry()
+
+    for subform in form.items.entries:
+        subform.server_id.choices = choices
+
+    if request.method == 'GET' and default_server_id:
+        form.items.entries[0].server_id.data = default_server_id
+
+    if request.method == 'POST':
+        current_app.logger.debug("Request.form = %r", request.form)
+        if not form.validate():
+            current_app.logger.debug("Form validate() returned False, errors = %r", form.errors)
+        else:
+            current_app.logger.debug("Form validate() returned True")
 
     if form.validate_on_submit():
         order = Order(
@@ -45,16 +66,15 @@ def new_order():
         )
         total = 0
         for item_form in form.items.entries:
-            server = Server.query.get(item_form.server_id.data)
-            if not server:
+            srv = Server.query.get(item_form.server_id.data)
+            if not srv:
                 continue
-            quantity = item_form.quantity.data
-            unit_price = server.price
-            total += unit_price * quantity
+            qty = item_form.quantity.data
+            total += float(srv.price) * qty
             order.items.append(OrderItem(
-                server_id=server.id,
-                quantity=quantity,
-                unit_price=unit_price
+                server_id=srv.id,
+                quantity=qty,
+                unit_price=srv.price
             ))
         order.total_price = total
 
@@ -63,11 +83,12 @@ def new_order():
             db.session.commit()
             flash('Заказ создан успешно!', 'success')
             return redirect(url_for('orders.show', order_id=order.id))
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             db.session.rollback()
             flash('Ошибка при создании заказа.', 'danger')
 
     return render_template('orders/new.html', form=form)
+
 
 @bp.route('/<int:order_id>')
 @login_required

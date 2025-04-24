@@ -1,7 +1,7 @@
 from app import create_app, db
 from app.models.server import Server
 
-app = create_app('app.config.Config')
+app = create_app('app.config.DevelopmentConfig')
 
 if __name__ == '__main__':
     with app.app_context():
