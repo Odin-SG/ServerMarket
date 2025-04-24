@@ -1,0 +1,52 @@
+.container { padding-top: 1rem; padding-bottom: 1rem; }
+
+.card {
+  border: none;
+  transition: transform .2s, box-shadow .2s;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.btn-primary {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+.btn-primary:hover {
+  background-color: #004494;
+  border-color: #004494;
+}
+
+form .form-control, form .form-select, form textarea {
+  border-radius: 0.25rem;
+  transition: border-color .15s;
+}
+form .form-control:focus, form .form-select:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 0 .2rem rgba(0,86,179,0.25);
+}
+
+.modal-content {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Segoe UI', sans-serif;
+  margin-bottom: 1rem;
+}
+
+.orders-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+.orders-list li:last-child {
+  border-bottom: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}

@@ -1,15 +1,61 @@
 <!doctype html>
 <html lang="ru">
-  <head><meta charset="utf-8"><title>{% block title %}A-STOR Магазин{% endblock %}</title></head>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-…"
+      crossorigin="anonymous"
+    >
+
+    <!-- FontAwesome (для иконок) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css"
+      rel="stylesheet"
+      integrity="sha384-…"
+      crossorigin="anonymous"
+    >
+
+    <!-- Ваши переопределения -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <title>{% block title %}A-STOR Магазин{% endblock %}</title>
+  </head>
   <body>
-    <nav>
-      {% if current_user.is_authenticated %}
-        Здравствуйте, {{ current_user.username }}! | <a href="{{ url_for('auth.logout') }}">Выйти</a>
-      {% else %}
-        <a href="{{ url_for('auth.login') }}">Войти</a> |
-        <a href="{{ url_for('auth.register') }}">Регистрация</a>
-      {% endif %}
-    </nav><hr>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('main.index') }}">A-STOR</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('servers.index') }}">Сервера</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('orders.new_order') }}">Конфигурации</a></li>
+          {% if current_user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                {{ current_user.username }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ url_for('orders.index') }}">Мои заказы</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Выйти</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Войти</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <hr>
     <div class="container">
       {% for message in get_flashed_messages() %}
         <p>{{ message }}</p>
