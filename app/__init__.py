@@ -54,6 +54,12 @@ def create_app(config_class='app.config.Config'):
     from app.servers.views import bp as servers_bp
     app.register_blueprint(servers_bp)
 
+    @app.teardown_request
+    def shutdown_session(exception=None):
+        if exception:
+            db.session.rollback()
+        db.session.remove()
+
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):
         tb = traceback.format_exc()

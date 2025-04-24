@@ -11,7 +11,12 @@ bp = Blueprint('servers', __name__, url_prefix='/servers')
 
 @bp.route('/')
 def index():
-    servers = Server.query.order_by(Server.model_name).all()
+    try:
+        servers = Server.query.order_by(Server.model_name).all()
+    except Exception:
+        from app import db
+        db.session.rollback()
+        servers = []
     return render_template('servers/index.html', servers=servers)
 
 
