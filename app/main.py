@@ -8,6 +8,7 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    total_users = User.query.count()
+    from app.models.server import Server
+    servers = Server.query.order_by(Server.model_name).all()
+    return render_template('servers/index.html', servers=servers)
 
-    return render_template('index.html', total_users=total_users)
