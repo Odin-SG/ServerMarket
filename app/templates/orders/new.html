@@ -6,32 +6,42 @@
   <form method="post">
     {{ form.hidden_tag() }}
 
-    <div>
-      {{ form.configuration.label }}<br>
-      {{ form.configuration() }}
+    <div class="mb-3">
+      {{ form.configuration.label(class="form-label") }}
+      {{ form.configuration(class="form-select", id="configuration") }}
     </div>
 
-    {% for item in form.items %}
-      <fieldset>
-        <legend>Позиция {{ loop.index }}</legend>
-        <div>
-          {{ item.server_id.label }}<br>
-          {{ item.server_id() }}
+    <div id="itemsContainer">
+    </div>
+
+    <template id="itemTemplate">
+      <fieldset class="mb-3 p-3 border rounded">
+        <legend>Позиция</legend>
+        <div class="mb-2">
+          <label for="items-__index__-server_id" class="form-label">Сервер</label>
+          <select name="items-__index__-server_id" id="items-__index__-server_id" class="form-select">
+            {% for s in servers %}
+              <option value="{{ s.id }}">{{ s.model_name }}</option>
+            {% endfor %}
+          </select>
         </div>
-        <div>
-          {{ item.quantity.label }}<br>
-          {{ item.quantity() }}
+        <div class="mb-2">
+          <label for="items-__index__-quantity" class="form-label">Количество</label>
+          <input type="number"
+                 name="items-__index__-quantity"
+                 id="items-__index__-quantity"
+                 class="form-control"
+                 min="1" max="10"
+                 value="1">
         </div>
       </fieldset>
-    {% endfor %}
+    </template>
 
-    <div>
-      {{ form.contact_info.label }}<br>
-      {{ form.contact_info(rows=4) }}
+    <div class="mb-3">
+      {{ form.contact_info.label(class="form-label") }}
+      {{ form.contact_info(class="form-control", rows="4") }}
     </div>
 
-    <div>
-      {{ form.submit() }}
-    </div>
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
   </form>
 {% endblock %}

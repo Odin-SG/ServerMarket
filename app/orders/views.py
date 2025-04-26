@@ -87,8 +87,7 @@ def new_order():
             db.session.rollback()
             flash('Ошибка при создании заказа.', 'danger')
 
-    return render_template('orders/new.html', form=form)
-
+    return render_template('orders/new.html', form=form, servers=Server.query.filter_by(is_available=True).order_by(Server.model_name).all())
 
 @bp.route('/<int:order_id>')
 @login_required
