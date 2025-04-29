@@ -39,9 +39,9 @@ def new_order():
         except (KeyError, TypeError):
             slots = 1
 
-        form.items.min_entries = slots
+        form.items.entries = []
 
-        while len(form.items.entries) < slots:
+        for _ in range(slots):
             form.items.append_entry()
 
     for subform in form.items.entries:
