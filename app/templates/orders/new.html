@@ -1,41 +1,79 @@
-{% extends 'base.html' %}
-{% block title %}Создать заказ{% endblock %}
-
+{% extends "base.html" %}
 {% block content %}
   <h2>Новый заказ</h2>
   <form method="post">
     {{ form.hidden_tag() }}
 
     <div class="mb-3">
-      {{ form.configuration.label(class="form-label") }}
-      {{ form.configuration(class="form-select") }}
+      <label for="configuration" class="form-label">Конфигурация</label>
+      <select name="configuration" id="configuration" class="form-select">
+        {% for name, label in config_choices %}
+          <option value="{{ name }}" {% if name == selected_config %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
     </div>
 
-    {% for item in form.items %}
+    <div id="itemsContainer"></div>
+
+    <template id="itemTemplate">
       <fieldset class="mb-4 p-3 border rounded">
-        <legend>Позиция {{ loop.index }}</legend>
+        <legend>Позиция __index__</legend>
         <div class="mb-2">
-          {{ item.server_id.label(class="form-label") }}
-          {{ item.server_id(class="form-select") }}
-          {% if item.server_id.errors %}
-            <div class="text-danger">{{ item.server_id.errors[0] }}</div>
-          {% endif %}
+          <label for="items-__index__-server_id" class="form-label">Сервер</label>
+          <select name="items-__index__-server_id" id="items-__index__-server_id" class="form-select">
+            {% for srv in servers %}
+              <option value="{{ srv.id }}">{{ srv.model_name }}</option>
+            {% endfor %}
+          </select>
         </div>
         <div class="mb-2">
-          {{ item.quantity.label(class="form-label") }}
-          {{ item.quantity(class="form-control") }}
-          {% if item.quantity.errors %}
-            <div class="text-danger">{{ item.quantity.errors[0] }}</div>
-          {% endif %}
+          <label for="items-__index__-quantity" class="form-label">Количество</label>
+          <input type="number"
+                 name="items-__index__-quantity"
+                 id="items-__index__-quantity"
+                 class="form-control"
+                 value="1" min="1" max="10" />
         </div>
       </fieldset>
-    {% endfor %}
+    </template>
 
     <div class="mb-3">
-      {{ form.contact_info.label(class="form-label") }}
-      {{ form.contact_info(class="form-control", rows="4") }}
+      <label for="contact_info" class="form-label">Контактная информация</label>
+      <textarea name="contact_info"
+                id="contact_info"
+                class="form-control"
+                rows="4">{{ contact_info }}</textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <button type="submit" class="btn btn-primary">Оформить заказ</button>
   </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const configSlots = {{ config_slots_map|tojson }};
+      const configSelect = document.getElementById('configuration');
+      const itemsContainer = document.getElementById('itemsContainer');
+      const itemTemplate = document.getElementById('itemTemplate');
+
+      function rebuildItems() {
+        const slots = configSlots[configSelect.value] || 1;
+        itemsContainer.innerHTML = '';
+        for (let i = 0; i < slots; i++) {
+          const clone = itemTemplate.content.cloneNode(true);
+          clone.querySelectorAll('[name]').forEach(el => {
+            el.name = el.name.replace('__index__', i);
+            el.id   = el.id.replace('__index__', i);
+          });
+          const legend = clone.querySelector('legend');
+          if (legend) {
+            legend.textContent = `Позиция ${i + 1}`;
+          }
+          itemsContainer.appendChild(clone);
+        }
+      }
+
+      configSelect.addEventListener('change', rebuildItems);
+      rebuildItems();
+    });
+  </script>
 {% endblock %}

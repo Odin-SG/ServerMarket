@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from app import db
-from app.orders.forms import OrderForm, OrderItemForm
+from app.orders.forms import OrderForm
 from app.models.order import Order, OrderStatus, ConfigurationType, OrderItem
 from app.models.server import Server
 
@@ -26,58 +26,64 @@ def index():
 @bp.route('/new', methods=['GET', 'POST'])
 @login_required
 def new_order():
-    default_server_id = request.args.get('server_id', type=int)
+    servers = Server.query.filter_by(is_available=True).order_by(Server.model_name).all()
+    config_choices = [(c.name, c.value) for c in ConfigurationType]
+    config_slots_map_js = {ct.name: cnt for ct, cnt in config_slots_map.items()}
+
     form = OrderForm()
-
-    servers = Server.query.filter_by(is_available=True).all()
-    choices = [(s.id, s.model_name) for s in servers]
-
-    if request.method == 'POST':
-        try:
-            config = ConfigurationType[form.configuration.data]
-            slots = config_slots_map[config]
-        except (KeyError, TypeError):
-            slots = 1
-
-        form.items.entries = []
-
-        for _ in range(slots):
-            form.items.append_entry()
-
-    for subform in form.items.entries:
-        subform.server_id.choices = choices
-
-    if request.method == 'GET' and default_server_id:
-        form.items.entries[0].server_id.data = default_server_id
-
-    if request.method == 'POST':
-        current_app.logger.debug("Request.form = %r", request.form)
-        if not form.validate():
-            current_app.logger.debug("Form validate() returned False, errors = %r", form.errors)
-        else:
-            current_app.logger.debug("Form validate() returned True")
+    form.configuration.choices = config_choices
 
     if form.validate_on_submit():
+        config_name = form.configuration.data
+        try:
+            slots = config_slots_map[ConfigurationType[config_name]]
+        except KeyError:
+            slots = 1
+
+        contact_text = form.contact_info.data.strip()
+
+        total = 0
+        items_data = []
+        for i in range(slots):
+            sid = request.form.get(f'items-{i}-server_id')
+            qty = request.form.get(f'items-{i}-quantity')
+            try:
+                sid = int(sid)
+                qty = int(qty)
+            except (TypeError, ValueError):
+                flash(f'Неверные данные в позиции {i+1}', 'danger')
+                return render_template('orders/new.html',
+                                       form=form,
+                                       servers=servers,
+                                       config_choices=config_choices,
+                                       selected_config=config_name,
+                                       contact_info=contact_text,
+                                       config_slots_map=config_slots_map_js)
+
+            srv = Server.query.get(sid)
+            if not srv:
+                flash(f'Сервер не найден в позиции {i+1}', 'danger')
+                return render_template('orders/new.html',
+                                       form=form,
+                                       servers=servers,
+                                       config_choices=config_choices,
+                                       selected_config=config_name,
+                                       contact_info=contact_text,
+                                       config_slots_map=config_slots_map_js)
+
+            total += float(srv.price) * qty
+            items_data.append({'server_id': srv.id, 'quantity': qty, 'unit_price': srv.price})
+
         order = Order(
             user_id=current_user.id,
-            configuration=ConfigurationType[form.configuration.data],
-            contact_info={'text': form.contact_info.data},
-            total_price=0
+            configuration=ConfigurationType[config_name],
+            contact_info={'text': contact_text},
+            total_price=total
         )
-        total = 0
-        for item_form in form.items.entries:
-            srv = Server.query.get(item_form.server_id.data)
-            if not srv:
-                continue
-            qty = item_form.quantity.data
-            total += float(srv.price) * qty
-            order.items.append(OrderItem(
-                server_id=srv.id,
-                quantity=qty,
-                unit_price=srv.price
-            ))
-        order.total_price = total
-
+        for it in items_data:
+            order.items.append(OrderItem(server_id=it['server_id'],
+                                         quantity=it['quantity'],
+                                         unit_price=it['unit_price']))
         try:
             db.session.add(order)
             db.session.commit()
@@ -87,7 +93,21 @@ def new_order():
             db.session.rollback()
             flash('Ошибка при создании заказа.', 'danger')
 
-    return render_template('orders/new.html', form=form, servers=Server.query.filter_by(is_available=True).order_by(Server.model_name).all())
+    else:
+        config_name = ConfigurationType.SOLO.name
+        contact_text = ''
+        if not form.is_submitted():
+            form.configuration.data = config_name
+            form.contact_info.data = contact_text
+
+    return render_template('orders/new.html',
+                           form=form,
+                           servers=servers,
+                           config_choices=config_choices,
+                           selected_config=config_name,
+                           contact_info=contact_text,
+                           config_slots_map=config_slots_map_js)
+
 
 @bp.route('/<int:order_id>')
 @login_required
