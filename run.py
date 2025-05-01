@@ -19,7 +19,7 @@ if __name__ == '__main__':
                         "RAM": "16 GB DDR4",
                         "Storage": "2 × 1 TB SATA"
                     },
-                    "image_url": "https://example.com/images/astor-basic.png",
+                    "image_url": "https://i.ebayimg.com/images/g/nS0AAOSw8ZFgEfGJ/s-l640.jpg",
                     "is_available": True
                 },
                 {
@@ -32,7 +32,7 @@ if __name__ == '__main__':
                         "RAM": "32 GB DDR4",
                         "Storage": "4 × 1 TB SAS"
                     },
-                    "image_url": "https://example.com/images/astor-pro.png",
+                    "image_url": "https://i.ebayimg.com/images/g/Fk8AAeSwtWFoE4CE/s-l1600.webp",
                     "is_available": True
                 },
                 {
@@ -45,7 +45,20 @@ if __name__ == '__main__':
                         "RAM": "64 GB DDR4 ECC",
                         "Storage": "2 × 1 TB NVMe"
                     },
-                    "image_url": "https://example.com/images/astor-ultra.png",
+                    "image_url": "https://i.ebayimg.com/images/g/dC0AAeSwEcloE3~w/s-l1600.webp",
+                    "is_available": True
+                },
+                {
+                    "model_name": "ASTOR Max",
+                    "slug": "astor-max",
+                    "description": "Топовая модель для очень высоких нагрузок и HPC.",
+                    "price": 249999.00,
+                    "specifications": {
+                        "CPU": "32-core 3.2 GHz",
+                        "RAM": "256 GB DDR4 ECC",
+                        "Storage": "8 × 1 TB NVMe"
+                    },
+                    "image_url": "https://i.ebayimg.com/images/g/qLUAAOSwB0tnrgsI/s-l1600.webp",
                     "is_available": True
                 },
             ]
