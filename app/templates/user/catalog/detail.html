@@ -1,22 +1,40 @@
 {% extends 'base.html' %}
 {% block title %}{{ server.model_name }}{% endblock %}
+
 {% block content %}
   <h1>{{ server.model_name }}</h1>
   {% if server.image_url %}
-    <img src="{{ server.image_url }}" alt="{{ server.model_name }}" width="300">
+    <img
+      src="{{ server.image_url }}"
+      alt="{{ server.model_name }}"
+      width="300"
+    >
   {% endif %}
   <p>{{ server.description }}</p>
+
   <h3>Характеристики</h3>
   <ul>
     {% for key, value in server.specifications.items() %}
       <li><strong>{{ key }}:</strong> {{ value }}</li>
     {% endfor %}
   </ul>
+
   <p><strong>Цена:</strong> {{ '{:.2f}'.format(server.price) }} ₽</p>
+
   {% if server.is_available %}
-    <a href="{{ url_for('orders.new_order') }}?server_id={{ server.id }}" class="btn">Заказать</a>
+    <a
+      href="{{ url_for('user.orders_new') }}?server_id={{ server.id }}"
+      class="btn btn-primary"
+    >
+      Заказать
+    </a>
   {% else %}
     <p>Нет в наличии</p>
   {% endif %}
-  <p><a href="{{ url_for('servers.index') }}">← Вернуться к каталогу</a></p>
+
+  <p>
+    <a href="{{ url_for('user.catalog_index') }}">
+      ← Вернуться к каталогу
+    </a>
+  </p>
 {% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Мои заказы{% endblock %}
+
+{% block content %}
+  <h2>Мои заказы</h2>
+
+  {% if orders %}
+    <ul>
+      {% for order in orders %}
+        <li>
+          <a href="{{ url_for('user.orders_show', order_id=order.id) }}">
+            Заказ №{{ order.id }} ({{ order.status.value }}) —
+            {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>
+      У вас ещё нет ни одного заказа.
+      <a href="{{ url_for('user.orders_new') }}">Создать заказ</a>.
+    </p>
+  {% endif %}
+
+  <p><a href="{{ url_for('user.catalog_index') }}">← Вернуться к каталогу серверов</a></p>
+{% endblock %}

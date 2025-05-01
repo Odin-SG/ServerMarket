@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Каталог серверов{% endblock %}
+
+{% block content %}
+  <h1>Каталог серверов</h1>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for server in servers %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          {% if server.image_url %}
+            <img
+              src="{{ server.image_url }}"
+              class="card-img-top"
+              alt="{{ server.model_name }}"
+            >
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ server.model_name }}</h5>
+            <p class="card-text text-truncate">
+              {{ server.description }}
+            </p>
+            <p class="fs-5 mt-auto">
+              <strong>{{ '{:.2f}'.format(server.price) }} ₽</strong>
+            </p>
+            <button
+              class="btn btn-primary btn-sm mt-2"
+              type="button"
+              onclick="loadInfo('{{ server.slug }}')"
+            >
+              <i class="fas fa-info-circle"></i> Подробнее
+            </button>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Bootstrap-модалка для информации о сервере -->
+  <div class="modal fade" id="serverModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="serverModalLabel"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

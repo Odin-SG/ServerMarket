@@ -49,10 +49,8 @@ def create_app(config_class='app.config.Config'):
     app.register_blueprint(main_bp)
     from app.auth.views import bp as auth_bp
     app.register_blueprint(auth_bp)
-    from app.orders.views import bp as order_bp
-    app.register_blueprint(order_bp)
-    from app.servers.views import bp as servers_bp
-    app.register_blueprint(servers_bp)
+    from app.user.views import bp as user_bp
+    app.register_blueprint(user_bp)
 
     @app.teardown_request
     def shutdown_session(exception=None):

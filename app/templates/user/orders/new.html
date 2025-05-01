@@ -1,4 +1,6 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% block title %}Новый заказ{% endblock %}
+
 {% block content %}
   <h2>Новый заказ</h2>
   <form method="post">
@@ -8,7 +10,12 @@
       <label for="configuration" class="form-label">Конфигурация</label>
       <select name="configuration" id="configuration" class="form-select">
         {% for name, label in config_choices %}
-          <option value="{{ name }}" {% if name == selected_config %}selected{% endif %}>{{ label }}</option>
+          <option
+            value="{{ name }}"
+            {% if name == selected_config %}selected{% endif %}
+          >
+            {{ label }}
+          </option>
         {% endfor %}
       </select>
     </div>
@@ -19,30 +26,52 @@
       <fieldset class="mb-4 p-3 border rounded">
         <legend>Позиция __index__</legend>
         <div class="mb-2">
-          <label for="items-__index__-server_id" class="form-label">Сервер</label>
-          <select name="items-__index__-server_id" id="items-__index__-server_id" class="form-select">
+          <label
+            for="items-__index__-server_id"
+            class="form-label"
+          >
+            Сервер
+          </label>
+          <select
+            name="items-__index__-server_id"
+            id="items-__index__-server_id"
+            class="form-select"
+          >
             {% for srv in servers %}
               <option value="{{ srv.id }}">{{ srv.model_name }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="mb-2">
-          <label for="items-__index__-quantity" class="form-label">Количество</label>
-          <input type="number"
-                 name="items-__index__-quantity"
-                 id="items-__index__-quantity"
-                 class="form-control"
-                 value="1" min="1" max="10" />
+          <label
+            for="items-__index__-quantity"
+            class="form-label"
+          >
+            Количество
+          </label>
+          <input
+            type="number"
+            name="items-__index__-quantity"
+            id="items-__index__-quantity"
+            class="form-control"
+            value="1"
+            min="1"
+            max="10"
+          />
         </div>
       </fieldset>
     </template>
 
     <div class="mb-3">
-      <label for="contact_info" class="form-label">Контактная информация</label>
-      <textarea name="contact_info"
-                id="contact_info"
-                class="form-control"
-                rows="4">{{ contact_info }}</textarea>
+      <label for="contact_info" class="form-label">
+        Контактная информация
+      </label>
+      <textarea
+        name="contact_info"
+        id="contact_info"
+        class="form-control"
+        rows="4"
+      >{{ contact_info }}</textarea>
     </div>
 
     <button type="submit" class="btn btn-primary">Оформить заказ</button>
@@ -50,7 +79,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const configSlots = {{ config_slots_map|tojson }};
+      const configSlots = {{ config_slots_map_js|tojson }};
       const configSelect = document.getElementById('configuration');
       const itemsContainer = document.getElementById('itemsContainer');
       const itemTemplate = document.getElementById('itemTemplate');

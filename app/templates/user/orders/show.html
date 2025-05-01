@@ -12,8 +12,9 @@
   <ul>
     {% for item in order.items %}
       <li>
-        {{ item.server.model_name }} — {{ item.quantity }} × {{ '{:.2f}'.format(item.unit_price) }} ₽
-        = {{ '{:.2f}'.format(item.quantity * item.unit_price) }} ₽
+        {{ item.server.model_name }} —
+        {{ item.quantity }} × {{ '{:.2f}'.format(item.unit_price) }} ₽ =
+        {{ '{:.2f}'.format(item.quantity * item.unit_price) }} ₽
       </li>
     {% endfor %}
   </ul>
@@ -23,5 +24,9 @@
   <h3>Контактная информация</h3>
   <p>{{ order.contact_info['text'] }}</p>
 
-  <a href="{{ url_for('orders.index') }}">← Вернуться к списку заказов</a>
+  <p>
+    <a href="{{ url_for('user.orders_index') }}">
+      ← Вернуться к списку заказов
+    </a>
+  </p>
 {% endblock %}

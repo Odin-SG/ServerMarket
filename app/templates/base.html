@@ -28,39 +28,55 @@
     <title>{% block title %}A-STOR Магазин{% endblock %}</title>
   </head>
   <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-      <a class="navbar-brand" href="{{ url_for('main.index') }}">A-STOR</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('servers.index') }}">Сервера</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('orders.new_order') }}">Конфигурации</a></li>
-          {% if current_user.is_authenticated %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                {{ current_user.username }}
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{{ url_for('orders.index') }}">Мои заказы</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Выйти</a></li>
-              </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('user.catalog_index') }}">A-STOR</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('user.catalog_index') }}">Сервера</a>
             </li>
-          {% else %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Войти</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a></li>
-          {% endif %}
-        </ul>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('user.orders_new') }}">Конфигурации</a>
+            </li>
+            {% if current_user.is_authenticated %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                  {{ current_user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="{{ url_for('user.orders_index') }}">
+                      Мои заказы
+                    </a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                      Выйти
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('auth.login') }}">Войти</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
       </div>
-    </div>
-  </nav>
-  <hr>
+    </nav>
+    <hr>
     <div class="container">
       {% for message in get_flashed_messages() %}
-        <p>{{ message }}</p>
+        <div class="alert alert-info">{{ message }}</div>
       {% endfor %}
       {% block content %}{% endblock %}
     </div>
