@@ -92,6 +92,31 @@
         });
         msgInput.value = '';
       });
+
+      const statusBtn = document.getElementById('statusBtn');
+      const statusSelect = document.getElementById('statusSelect');
+      const statusAlert = document.getElementById('statusAlert');
+
+      statusBtn.addEventListener('click', async () => {
+        const newStatus = statusSelect.value;
+        try {
+          const res = await fetch(
+            "{{ url_for('moderator.order_change_status', order_id=order.id) }}",
+            {
+              method: 'POST',
+              headers: {'Content-Type':'application/json'},
+              body: JSON.stringify({status: newStatus})
+            }
+          );
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Unknown error');
+          document.getElementById('currentStatus').textContent = data.new_status;
+          statusAlert.innerHTML = '<div class="alert alert-success">Статус обновлён</div>';
+        } catch (err) {
+          console.error(err);
+          statusAlert.innerHTML = `<div class="alert alert-danger">Ошибка: ${err.message}</div>`;
+        }
+      });
     });
   </script>
 {% endblock %}
