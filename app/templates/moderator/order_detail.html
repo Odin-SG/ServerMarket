@@ -26,57 +26,72 @@
 
 <hr>
 <h3>Чат с покупателем</h3>
-<div class="mb-4">
+<div id="chatMessages" class="mb-4" style="max-height: 400px; overflow-y: auto;">
   {% for msg in chats %}
     <div class="mb-2">
       <small class="text-muted">
-        {{ msg.author.username }} —
-        {{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}
+        {{ msg.author.username|e }} — {{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}
       </small><br>
-      <p>{{ msg.message }}</p>
+      <p>{{ msg.message|e }}</p>
     </div>
   {% endfor %}
 </div>
 
-<form method="post">
+<form id="chatForm">
   {{ chat_form.hidden_tag() }}
   <div class="mb-3">
-    {{ chat_form.message(class="form-control", rows=3) }}
+    {{ chat_form.message(id="chatMessage", class="form-control", rows=3) }}
   </div>
-  <button class="btn btn-primary" type="submit" name="chat-submit">
-    {{ chat_form.submit.label.text }}
-  </button>
+  <button class="btn btn-primary" type="submit">{{ chat_form.submit.label.text }}</button>
 </form>
+
 
 <p class="mt-4">
   <a href="{{ url_for('moderator.orders') }}">← Назад к списку заказов</a>
 </p>
 {% endblock %}
 {% block scripts %}
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
-    document.getElementById('statusBtn').addEventListener('click', async () => {
-      const select = document.getElementById('statusSelect');
-      const newStatus = select.value;
-      const alertDiv = document.getElementById('statusAlert');
+    document.addEventListener('DOMContentLoaded', () => {
+      const orderId = {{ order.id }};
+      const socket = io();
 
-      try {
-        const res = await fetch(
-          "{{ url_for('moderator.order_change_status', order_id=order.id) }}",
-          {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({status: newStatus})
-          }
-        );
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Unknown');
+      socket.emit('join', {order_id: orderId});
 
-        document.getElementById('currentStatus').textContent = data.new_status;
-        alertDiv.innerHTML = '<div class="alert alert-success">Статус обновлён</div>';
-      } catch (err) {
-        console.error(err);
-        alertDiv.innerHTML = '<div class="alert alert-danger">Ошибка: ' + err + '</div>';
-      }
+      socket.on('receive_chat', data => {
+        const chatDiv = document.getElementById('chatMessages');
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('mb-2');
+
+        const meta = document.createElement('small');
+        meta.classList.add('text-muted');
+        meta.textContent = `${data.username} — ${data.created_at}`;
+
+        const br = document.createElement('br');
+
+        const msgP = document.createElement('p');
+        msgP.textContent = data.message;
+
+        wrapper.appendChild(meta);
+        wrapper.appendChild(br);
+        wrapper.appendChild(msgP);
+        chatDiv.appendChild(wrapper);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      });
+
+      const chatForm = document.getElementById('chatForm');
+      const msgInput = document.getElementById('chatMessage');
+      chatForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const text = msgInput.value.trim();
+        if (!text) return;
+        socket.emit('send_chat', {
+          order_id: orderId,
+          message: text
+        });
+        msgInput.value = '';
+      });
     });
   </script>
 {% endblock %}

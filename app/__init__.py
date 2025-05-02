@@ -25,13 +25,38 @@ def create_app(config_class='app.config.Config'):
     app.config.from_object(config_class)
 
     talisman.init_app(app,
-        content_security_policy={
-            'default-src': "'self'",
-            'script-src': ["'self'"],
-            'style-src': ["'self'", 'https://cdn.jsdelivr.net'],
-        },
-        force_https=False
-    )
+                      content_security_policy={
+                          'default-src': ["'self'"],
+                          'script-src': [
+                              "'self'",
+                              'https://cdn.socket.io',
+                              'https://cdn.jsdelivr.net',
+                              "'unsafe-inline'",
+                              "'unsafe-eval'"
+                          ],
+                          'style-src': [
+                              "'self'",
+                              'https://cdn.jsdelivr.net',
+                              "'unsafe-inline'"
+                          ],
+                          'font-src': [
+                              "'self'",
+                              'https://cdn.jsdelivr.net',
+                          ],
+                          'img-src': [
+                              "'self'",
+                              'data:',
+                              'https://cdn.jsdelivr.net',
+                              'https://i.ebayimg.com'
+                          ],
+                          'connect-src': [
+                              "'self'",
+                              'https://cdn.socket.io',
+                              'ws://*'
+                          ]
+                      },
+                      force_https=False
+                      )
 
     limiter.init_app(app)
 
@@ -41,6 +66,7 @@ def create_app(config_class='app.config.Config'):
     CORS(app)
     ma.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*")
+    from . import chat_socket
 
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Пожалуйста, войдите для доступа к этой странице.'

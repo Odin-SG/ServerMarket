@@ -10,6 +10,7 @@ from app.models.order import (
     Order, OrderItem, OrderStatus, ConfigurationType
 )
 from app.models.server import Server
+from app.models.chat_message import ChatMessage
 
 bp = Blueprint('user', __name__)
 
@@ -138,4 +139,9 @@ def orders_show(order_id):
     if order.user_id != current_user.id:
         flash('Доступ запрещён.', 'warning')
         return redirect(url_for('user.orders_index'))
-    return render_template('user/orders/show.html', order=order)
+    chats = order.chat_messages.order_by(ChatMessage.created_at).all()
+    return render_template(
+        'user/orders/show.html',
+        order=order,
+        chats=chats
+    )
