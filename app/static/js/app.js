@@ -63,4 +63,22 @@ document.addEventListener('DOMContentLoaded', () => {
     configSelect.addEventListener('change', rebuildItems);
     rebuildItems();
   }
+
+      window.addToCart = async function(serverId) {
+      try {
+        const res = await fetch("/cart/add", {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({server_id: serverId, quantity: 1})
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        document.getElementById('cartCount').textContent = data.cart_count;
+        alert('Добавлено в корзину!');
+      } catch (e) {
+        console.error(e);
+        alert('Не удалось добавить в корзину.');
+      }
+    };
+
 });

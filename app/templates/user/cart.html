@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Корзина{% endblock %}
+
+{% block content %}
+  <h2>Ваша корзина</h2>
+  {% if cart_items %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Сервер</th>
+          <th>Цена</th>
+          <th>Количество</th>
+          <th>Итого</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart_items %}
+          <tr data-server-id="{{ item.server.id }}">
+            <td>{{ item.server.model_name }}</td>
+            <td>{{ '{:.2f}'.format(item.server.price) }} ₽</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ '{:.2f}'.format(item.line_total) }} ₽</td>
+            <td>
+              <button class="btn btn-sm btn-danger btn-remove">×</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3">Итого:</th>
+          <th>{{ '{:.2f}'.format(total) }} ₽</th>
+          <th></th>
+        </tr>
+      </tfoot>
+    </table>
+    <a href="{{ url_for('user.cart_checkout') }}" class="btn btn-primary">
+      Оформить заказ из корзины
+    </a>
+  {% else %}
+    <p>Ваша корзина пуста. <a href="{{ url_for('user.catalog_index') }}">Перейти в каталог</a>.</p>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    document.querySelectorAll('.btn-remove').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const row = btn.closest('tr');
+        const sid = row.dataset.serverId;
+        try {
+          const res = await fetch("{{ url_for('user.cart_remove') }}", {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({server_id: sid})
+          });
+          const data = await res.json();
+          if (data.success) {
+            row.remove();
+            document.getElementById('cartCount').textContent = data.cart_count;
+          } else {
+            alert(data.error);
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Ошибка при удалении из корзины.');
+        }
+      });
+    });
+  </script>
+{% endblock %}

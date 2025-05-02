@@ -77,3 +77,11 @@ class ServerForm(FlaskForm):
                 json.loads(field.data)
             except json.JSONDecodeError:
                 raise ValidationError('Недействительный JSON.')
+
+
+class CartCheckoutForm(FlaskForm):
+    contact_info = TextAreaField(
+        'Контактная информация',
+        validators=[DataRequired(), Length(max=500)]
+    )
+    submit = SubmitField('Оформить заказ')

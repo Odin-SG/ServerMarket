@@ -1,11 +1,11 @@
 from flask import (
     Blueprint, render_template, redirect, url_for,
-    flash, request, jsonify, current_app
+    flash, request, jsonify, current_app, session
 )
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from app import db
-from app.user.forms import OrderForm, ServerForm
+from app.user.forms import OrderForm, CartCheckoutForm
 from app.models.order import (
     Order, OrderItem, OrderStatus, ConfigurationType
 )
@@ -13,6 +13,7 @@ from app.models.server import Server
 from app.models.chat_message import ChatMessage
 
 bp = Blueprint('user', __name__)
+
 
 @bp.route('/servers/')
 def catalog_index():
@@ -41,6 +42,7 @@ def catalog_info(slug):
         'specifications': server.specifications
     })
 
+
 config_slots_map = {
     ConfigurationType.SOLO: 1,
     ConfigurationType.SMALL: 2,
@@ -53,8 +55,8 @@ config_slots_map = {
 @login_required
 def orders_index():
     orders = Order.query.filter_by(user_id=current_user.id) \
-                        .order_by(Order.created_at.desc()) \
-                        .all()
+        .order_by(Order.created_at.desc()) \
+        .all()
     return render_template('user/orders/index.html', orders=orders)
 
 
@@ -62,8 +64,8 @@ def orders_index():
 @login_required
 def orders_new():
     servers = Server.query.filter_by(is_available=True) \
-                          .order_by(Server.model_name) \
-                          .all()
+        .order_by(Server.model_name) \
+        .all()
     config_choices = [(c.name, c.value) for c in ConfigurationType]
     config_slots_map_js = {c.name: slots for c, slots in config_slots_map.items()}
 
@@ -81,14 +83,15 @@ def orders_new():
             sid = request.form.get(f'items-{i}-server_id')
             qty = request.form.get(f'items-{i}-quantity')
             try:
-                sid = int(sid); qty = int(qty)
+                sid = int(sid);
+                qty = int(qty)
             except (TypeError, ValueError):
-                flash(f'Неверные данные в позиции {i+1}', 'danger')
+                flash(f'Неверные данные в позиции {i + 1}', 'danger')
                 break
 
             srv = Server.query.get(sid)
             if not srv:
-                flash(f'Сервер не найден в позиции {i+1}', 'danger')
+                flash(f'Сервер не найден в позиции {i + 1}', 'danger')
                 break
 
             total += float(srv.price) * qty
@@ -145,3 +148,114 @@ def orders_show(order_id):
         order=order,
         chats=chats
     )
+
+
+@bp.route('/cart/')
+@login_required
+def cart_view():
+    cart = session.get('cart', {})
+    servers = []
+    total = 0
+    for sid, qty in cart.items():
+        srv = Server.query.get(sid)
+        if not srv: continue
+        line = {'server': srv, 'quantity': qty, 'line_total': float(srv.price) * qty}
+        total += line['line_total']
+        servers.append(line)
+    return render_template('user/cart.html', cart_items=servers, total=total)
+
+
+@bp.route('/cart/add', methods=['POST'])
+@login_required
+def cart_add():
+    data = request.get_json() or {}
+    sid = data.get('server_id')
+    qty = data.get('quantity', 1)
+    try:
+        sid = int(sid);
+        qty = int(qty)
+    except (TypeError, ValueError):
+        return jsonify(success=False, error='Неверные данные'), 400
+
+    srv = Server.query.get(sid)
+    if not srv or not srv.is_available:
+        return jsonify(success=False, error='Сервер не найден'), 404
+
+    cart = session.setdefault('cart', {})
+    cart[str(sid)] = cart.get(str(sid), 0) + qty
+    session['cart'] = cart
+
+    return jsonify(success=True, cart_count=sum(cart.values()))
+
+
+@bp.route('/cart/remove', methods=['POST'])
+@login_required
+def cart_remove():
+    data = request.get_json() or {}
+    sid = data.get('server_id')
+    try:
+        sid = str(int(sid))
+    except (TypeError, ValueError):
+        return jsonify(success=False, error='Неверные данные'), 400
+
+    cart = session.get('cart', {})
+    if sid in cart:
+        cart.pop(sid)
+        session['cart'] = cart
+        return jsonify(success=True, cart_count=sum(cart.values()))
+    return jsonify(success=False, error='Не в корзине'), 404
+
+@bp.route('/orders/checkout', methods=['GET', 'POST'])
+@login_required
+def cart_checkout():
+    cart = session.get('cart', {})
+    if not cart:
+        flash('Ваша корзина пуста.', 'warning')
+        return redirect(url_for('user.catalog_index'))
+
+    items = []
+    total = 0
+    for sid_str, qty in cart.items():
+        try:
+            sid = int(sid_str)
+        except ValueError:
+            continue
+        srv = Server.query.get(sid)
+        if not srv:
+            continue
+        line_total = float(srv.price) * qty
+        total += line_total
+        items.append({'server': srv, 'quantity': qty, 'unit_price': srv.price, 'line_total': line_total})
+
+    form = CartCheckoutForm()
+    if form.validate_on_submit():
+        contact_text = form.contact_info.data.strip()
+        order = Order(
+            user_id=current_user.id,
+            configuration=ConfigurationType.SOLO,
+            contact_info={'text': contact_text},
+            total_price=total
+        )
+        for it in items:
+            order.items.append(OrderItem(
+                server_id=it['server'].id,
+                quantity=it['quantity'],
+                unit_price=it['unit_price']
+            ))
+        try:
+            db.session.add(order)
+            db.session.commit()
+            session.pop('cart', None)
+            flash('Заказ из корзины создан успешно!', 'success')
+            return redirect(url_for('user.orders_show', order_id=order.id))
+        except SQLAlchemyError:
+            db.session.rollback()
+            flash('Ошибка при создании заказа.', 'danger')
+
+    return render_template(
+        'user/orders/checkout.html',
+        form=form,
+        items=items,
+        total=total
+    )
+

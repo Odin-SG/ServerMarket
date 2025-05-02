@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Оформление заказа из корзины{% endblock %}
+
+{% block content %}
+  <h2>Оформление заказа</h2>
+
+  <h3>Товары в корзине</h3>
+  <ul class="list-group mb-4">
+    {% for it in items %}
+      <li class="list-group-item d-flex justify-content-between">
+        <div>
+          {{ it.server.model_name }} &times; {{ it.quantity }}
+        </div>
+        <span>{{ '{:.2f}'.format(it.line_total) }} ₽</span>
+      </li>
+    {% endfor %}
+    <li class="list-group-item d-flex justify-content-between">
+      <strong>Итого</strong>
+      <strong>{{ '{:.2f}'.format(total) }} ₽</strong>
+    </li>
+  </ul>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.contact_info.label }}
+      {{ form.contact_info(class="form-control", rows=4) }}
+    </div>
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <a href="{{ url_for('user.cart_view') }}" class="btn btn-link">← Вернуться в корзину</a>
+  </form>
+{% endblock %}
