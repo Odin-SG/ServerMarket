@@ -54,6 +54,11 @@ def create_app(config_class='app.config.Config'):
     from app.moderator.views import bp as moderator_bp
     app.register_blueprint(moderator_bp)
 
+    @app.context_processor
+    def inject_user_roles():
+        from app.models.user import UserRole
+        return dict(UserRole=UserRole)
+
     @app.teardown_request
     def shutdown_session(exception=None):
         if exception:

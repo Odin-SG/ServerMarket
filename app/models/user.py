@@ -34,7 +34,6 @@ class User(db.Model, UserMixin):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     orders = db.relationship('Order', backref='user', lazy='dynamic')
-    #chat_messages = db.relationship('ChatMessage', backref='author', lazy='dynamic')
 
     def __repr__(self):
         return f'<User {self.username} ({self.email})>'

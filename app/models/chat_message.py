@@ -12,4 +12,4 @@ class ChatMessage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     order = db.relationship('Order', backref=db.backref('chat_messages', lazy='dynamic'))
-    author = db.relationship('User')
+    author = db.relationship('User', backref=db.backref('chat_messages', lazy='dynamic'))
