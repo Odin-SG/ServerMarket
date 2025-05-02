@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Заявки для модератора{% endblock %}
+
+{% block content %}
+<h2>Все заказы</h2>
+<ul class="list-group">
+  {% for order in orders.items %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <a href="{{ url_for('moderator.order_detail', order_id=order.id) }}">
+        Заказ №{{ order.id }} — {{ order.status.value }}
+      </a>
+      <span>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+    </li>
+  {% endfor %}
+</ul>
+
+{% if orders.has_prev %}
+  <a href="{{ url_for('moderator.orders', page=orders.prev_num) }}">← Назад</a>
+{% endif %}
+{% if orders.has_next %}
+  <a href="{{ url_for('moderator.orders', page=orders.next_num) }}">Вперёд →</a>
+{% endif %}
+{% endblock %}

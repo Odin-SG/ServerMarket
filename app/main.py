@@ -10,5 +10,5 @@ bp = Blueprint('main', __name__)
 def index():
     from app.models.server import Server
     servers = Server.query.order_by(Server.model_name).all()
-    return render_template('servers/index.html', servers=servers)
+    return render_template('user/catalog/index.html', servers=servers)
 

@@ -51,6 +51,8 @@ def create_app(config_class='app.config.Config'):
     app.register_blueprint(auth_bp)
     from app.user.views import bp as user_bp
     app.register_blueprint(user_bp)
+    from app.moderator.views import bp as moderator_bp
+    app.register_blueprint(moderator_bp)
 
     @app.teardown_request
     def shutdown_session(exception=None):
