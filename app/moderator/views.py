@@ -10,6 +10,7 @@ from app.models.user import UserRole
 
 bp = Blueprint('moderator', __name__, url_prefix='/moderator')
 
+
 def moderator_required(f):
     from functools import wraps
     from flask import abort
@@ -18,7 +19,9 @@ def moderator_required(f):
         if current_user.role != UserRole.MODERATOR and current_user.role != UserRole.ADMIN:
             abort(403)
         return f(*args, **kwargs)
+
     return wrapped
+
 
 @bp.route('/orders/')
 @login_required
@@ -31,6 +34,7 @@ def orders():
                   error_out=False)
 
     return render_template('moderator/orders.html', orders=orders)
+
 
 @bp.route('/orders/<int:order_id>/', methods=['GET', 'POST'])
 @login_required
@@ -67,3 +71,19 @@ def order_detail(order_id):
         chat_form=chat_form,
         status_form=status_form
     )
+
+
+@bp.route('/orders/<int:order_id>/status', methods=['POST'])
+@login_required
+@moderator_required
+def order_change_status(order_id):
+    order = Order.query.get_or_404(order_id)
+    new_status_name = request.json.get('status')
+    try:
+        new_status = OrderStatus[new_status_name]
+    except KeyError:
+        return {'success': False, 'error': 'Недопустимый статус'}, 400
+
+    order.status = new_status
+    db.session.commit()
+    return {'success': True, 'new_status': new_status.value}
