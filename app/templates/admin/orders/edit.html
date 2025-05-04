@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Редактировать заказ #{{ order.id }}{% endblock %}
+
+{% block content %}
+  <h2>Редактирование заказа №{{ order.id }}</h2>
+
+  <form method="post" action="{{ url_for('admin.orders_edit', order_id=order.id) }}">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.status.label(class="form-label") }}
+      {{ form.status(class="form-select") }}
+    </div>
+    <div class="mb-3">
+      {{ form.contact_info.label(class="form-label") }}
+      {{ form.contact_info(class="form-control", rows=3) }}
+    </div>
+    <button type="submit" name="{{ form.submit.name }}" class="btn btn-primary">
+      {{ form.submit.label.text }}
+    </button>
+  </form>
+
+  <hr>
+
+  <h3>Чат с покупателем</h3>
+
+  <div id="chatMessages"
+       class="mb-4"
+       style="max-height:400px; overflow-y:auto; border:1px solid #ddd; padding:10px;">
+    {% for msg in chat_messages %}
+      <div class="mb-2" id="msg-{{ msg.id }}">
+        <small class="text-muted">
+          {{ msg.author.username|e }} — {{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}
+        </small><br>
+        <p>{{ msg.message|e }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form id="chatForm" class="mb-4">
+    {{ chat_form.hidden_tag() }}
+    <div class="mb-3">
+      {{ chat_form.message(id="chatMessage", class="form-control", rows=2, placeholder="Ваше сообщение...") }}
+    </div>
+    <button type="submit" class="btn btn-success">{{ chat_form.submit.label.text }}</button>
+  </form>
+
+  <hr>
+
+  <h4>Правка существующих сообщений</h4>
+  {% for msg, edit_form in chat_edit_forms %}
+    <div class="border p-3 mb-3">
+      <small class="text-muted">
+        {{ msg.author.username|e }} — {{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}
+      </small>
+      <form method="post"
+            action="{{ url_for('admin.chat_edit', msg_id=msg.id) }}"
+            class="mt-2">
+        {{ edit_form.hidden_tag() }}
+        <div class="mb-2">
+          {{ edit_form.message(class="form-control", rows=2) }}
+        </div>
+        <button name="{{ edit_form.save.name }}" class="btn btn-sm btn-primary">
+          {{ edit_form.save.label.text }}
+        </button>
+        <button name="{{ edit_form.delete.name }}" class="btn btn-sm btn-danger">
+          {{ edit_form.delete.label.text }}
+        </button>
+      </form>
+    </div>
+  {% endfor %}
+
+  <p class="mt-4">
+    <a href="{{ url_for('admin.orders_index') }}">← Назад к списку заказов</a>
+  </p>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const orderId = {{ order.id }};
+      const socket = io();
+
+      socket.emit('join', {order_id: orderId});
+
+      socket.on('receive_chat', data => {
+        const chatDiv = document.getElementById('chatMessages');
+        const row = document.createElement('div');
+        row.classList.add('mb-2');
+        row.innerHTML = `
+          <small class="text-muted">${data.username} — ${data.created_at}</small><br>
+          <p>${data.message.replace(/</g,'&lt;')}</p>
+        `;
+        chatDiv.appendChild(row);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      });
+
+      const chatForm = document.getElementById('chatForm');
+      const msgInput = document.getElementById('chatMessage');
+      chatForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const text = msgInput.value.trim();
+        if (!text) return;
+        socket.emit('send_chat', {order_id: orderId, message: text});
+        msgInput.value = '';
+      });
+    });
+  </script>
+{% endblock %}

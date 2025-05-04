@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DecimalField, TextAreaField, BooleanField, SubmitField
+from wtforms import StringField, DecimalField, TextAreaField, BooleanField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length, URL, NumberRange, Regexp, Optional, ValidationError
 from app.models.server import Server
+from app.models.order import OrderStatus
 import json
 
 
@@ -27,3 +28,22 @@ class ServerForm(FlaskForm):
                 json.loads(field.data)
             except:
                 raise ValidationError('Неверный JSON')
+
+
+class OrderEditForm(FlaskForm):
+    status = SelectField(
+        'Статус заказа',
+        choices=[(s.name, s.value) for s in OrderStatus],
+        validators=[DataRequired()]
+    )
+    contact_info = TextAreaField(
+        'Контактная информация',
+        validators=[DataRequired(), Length(max=500)]
+    )
+    submit = SubmitField('Сохранить изменения')
+
+
+class ChatMessageEditForm(FlaskForm):
+    message = TextAreaField('Сообщение', validators=[DataRequired(), Length(max=2000)])
+    save = SubmitField('Сохранить')
+    delete = SubmitField('Удалить')

@@ -1,12 +1,35 @@
-{% extends 'base.html' %}{% block title %}Все заказы{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Все заказы{% endblock %}
+
 {% block content %}
   <h2>Все заказы</h2>
-  <ul class="list-group">
-    {% for o in orders %}
-      <li class="list-group-item">
-        Заказ №{{ o.id }} от {{ o.user.username }} —
-        {{ o.status.value }} — {{ '{:.2f}'.format(o.total_price) }} ₽
-      </li>
-    {% endfor %}
-  </ul>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Пользователь</th>
+        <th>Статус</th>
+        <th>Сумма (₽)</th>
+        <th>Дата</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+        <tr>
+          <td>{{ o.id }}</td>
+          <td>{{ o.user.username }}</td>
+          <td>{{ o.status.value }}</td>
+          <td>{{ '{:.2f}'.format(o.total_price) }}</td>
+          <td>{{ o.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+          <td>
+            <a href="{{ url_for('admin.orders_edit', order_id=o.id) }}"
+               class="btn btn-sm btn-primary">
+              Редактировать
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}
