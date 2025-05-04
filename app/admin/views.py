@@ -6,6 +6,7 @@ from app.admin.forms import ServerForm
 from app.models.server import Server
 from app.models.order import Order
 from app.models.user import User
+import json
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -60,6 +61,11 @@ def servers_new():
 def servers_edit(id):
     srv = Server.query.get_or_404(id)
     form = ServerForm(obj=srv)
+    form.original_slug = srv.slug
+
+    if not form.is_submitted():
+        form.specifications.data = json.dumps(srv.specifications or {}, ensure_ascii=False, indent=2)
+
     if form.validate_on_submit():
         form.populate_obj(srv)
         if form.specifications.data:
