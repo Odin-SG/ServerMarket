@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} сервер{% endblock %}
+
+{% block content %}
+  <h2>{{ action }} сервер</h2>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.model_name.label(class="form-label") }}
+      {{ form.model_name(class="form-control") }}
+      {% for err in form.model_name.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.slug.label(class="form-label") }}
+      {{ form.slug(class="form-control") }}
+      {% for err in form.slug.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.description.label(class="form-label") }}
+      {{ form.description(class="form-control", rows=5) }}
+      {% for err in form.description.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.price.label(class="form-label") }}
+      {{ form.price(class="form-control") }}
+      {% for err in form.price.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.specifications.label(class="form-label") }}
+      {{ form.specifications(class="form-control", rows=4) }}
+      {% for err in form.specifications.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.image_url.label(class="form-label") }}
+      {{ form.image_url(class="form-control") }}
+      {% for err in form.image_url.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-check mb-3">
+      {{ form.is_available(class="form-check-input") }}
+      {{ form.is_available.label(class="form-check-label") }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ action }}</button>
+    <a href="{{ url_for('admin.servers_index') }}" class="btn btn-link">
+      Отменить
+    </a>
+  </form>
+{% endblock %}

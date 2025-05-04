@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% block title %}Админка{% endblock %}
+{% block content %}
+  <h2>Панель администратора</h2>
+  <ul>
+    <li>Пользователей: {{ total_users }}</li>
+    <li>Заказов: {{ total_orders }}</li>
+    <li>Оборот: {{ '{:.2f}'.format(total_revenue) }} ₽</li>
+  </ul>
+  <p>
+    <a href="{{ url_for('admin.servers_index') }}">Управление серверами</a><br>
+    <a href="{{ url_for('admin.orders_index') }}">Все заказы</a>
+  </p>
+{% endblock %}

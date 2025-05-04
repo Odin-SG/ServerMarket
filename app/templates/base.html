@@ -46,6 +46,11 @@
                 </a>
               </li>
             {% endif %}
+            {% if current_user.is_authenticated and current_user.role == UserRole.ADMIN %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Админка</a>
+              </li>
+            {% endif %}
             {% if current_user.is_authenticated %}
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

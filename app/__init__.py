@@ -79,6 +79,8 @@ def create_app(config_class='app.config.Config'):
     app.register_blueprint(user_bp)
     from app.moderator.views import bp as moderator_bp
     app.register_blueprint(moderator_bp)
+    from app.admin.views import bp as admin_bp
+    app.register_blueprint(admin_bp)
 
     @app.context_processor
     def inject_user_roles():
