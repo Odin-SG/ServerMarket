@@ -166,14 +166,15 @@ def cart_view():
 
 
 @bp.route('/cart/add', methods=['POST'])
-@login_required
 def cart_add():
+    if not current_user.is_authenticated:
+        return jsonify(success=False, login=True), 401
+
     data = request.get_json() or {}
     sid = data.get('server_id')
     qty = data.get('quantity', 1)
     try:
-        sid = int(sid);
-        qty = int(qty)
+        sid = int(sid); qty = int(qty)
     except (TypeError, ValueError):
         return jsonify(success=False, error='Неверные данные'), 400
 
@@ -181,7 +182,7 @@ def cart_add():
     if not srv or not srv.is_available:
         return jsonify(success=False, error='Сервер не найден'), 404
 
-    cart = session.setdefault('cart', {})
+    cart = session.get('cart', {})
     cart[str(sid)] = cart.get(str(sid), 0) + qty
     session['cart'] = cart
 
@@ -189,8 +190,9 @@ def cart_add():
 
 
 @bp.route('/cart/remove', methods=['POST'])
-@login_required
 def cart_remove():
+    if not current_user.is_authenticated:
+        return jsonify(success=False, error='login_required'), 401
     data = request.get_json() or {}
     sid = data.get('server_id')
     try:

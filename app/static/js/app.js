@@ -64,21 +64,41 @@ document.addEventListener('DOMContentLoaded', () => {
     rebuildItems();
   }
 
-      window.addToCart = async function(serverId) {
-      try {
-        const res = await fetch("/cart/add", {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({server_id: serverId, quantity: 1})
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-        document.getElementById('cartCount').textContent = data.cart_count;
-        alert('Добавлено в корзину!');
-      } catch (e) {
-        console.error(e);
-        alert('Не удалось добавить в корзину.');
-      }
-    };
+  window.addToCart = async function(serverId) {
+    try {
+      const res = await fetch("/cart/add", {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({server_id: serverId, quantity: 1})
+      });
 
+      if (res.status === 401) {
+        window.location = window.LOGIN_URL;
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        showToast('Не удалось добавить в корзину', 'danger');
+        return;
+      }
+      document.getElementById('cartCount').textContent = data.cart_count;
+      showToast('Добавлено в корзину', 'success');
+
+    } catch (e) {
+      console.error(e);
+      showToast('Ошибка при добавлении в корзину', 'danger');
+    }
+  };
+
+
+  function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
+    toast.style.zIndex = 1050;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
 });
