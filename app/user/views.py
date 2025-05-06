@@ -5,12 +5,14 @@ from flask import (
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from app import db
-from app.user.forms import OrderForm, CartCheckoutForm
+from app.user.forms import OrderForm, CartCheckoutForm, UserSettingsForm
 from app.models.order import (
     Order, OrderItem, OrderStatus, ConfigurationType
 )
 from app.models.server import Server
 from app.models.chat_message import ChatMessage
+from werkzeug.security import generate_password_hash
+
 
 bp = Blueprint('user', __name__)
 
@@ -174,7 +176,8 @@ def cart_add():
     sid = data.get('server_id')
     qty = data.get('quantity', 1)
     try:
-        sid = int(sid); qty = int(qty)
+        sid = int(sid);
+        qty = int(qty)
     except (TypeError, ValueError):
         return jsonify(success=False, error='Неверные данные'), 400
 
@@ -206,6 +209,7 @@ def cart_remove():
         session['cart'] = cart
         return jsonify(success=True, cart_count=sum(cart.values()))
     return jsonify(success=False, error='Не в корзине'), 404
+
 
 @bp.route('/orders/checkout', methods=['GET', 'POST'])
 @login_required
@@ -261,3 +265,35 @@ def cart_checkout():
         total=total
     )
 
+
+@bp.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    form = UserSettingsForm(
+        username=current_user.username,
+        email=current_user.email,
+        first_name=current_user.first_name,
+        last_name=current_user.last_name,
+        phone_number=current_user.phone_number,
+        avatar_url=current_user.avatar_url,
+        address=current_user.address
+    )
+    if form.validate_on_submit():
+        # базовые поля
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data
+        current_user.phone_number = form.phone_number.data
+        current_user.avatar_url = form.avatar_url.data
+        current_user.address = form.address.data
+
+        # смена пароля, если нужно
+        if form.change_password.data and form.password.data:
+            current_user.password_hash = generate_password_hash(form.password.data)
+
+        db.session.commit()
+        flash('Профиль обновлён', 'success')
+        return redirect(url_for('user.settings'))
+
+    return render_template('user/settings.html', form=form)

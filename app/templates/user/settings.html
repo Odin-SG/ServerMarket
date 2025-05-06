@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Настройки профиля{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Главная</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Мои настройки</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="card mx-auto" style="max-width: 600px;">
+  <div class="card-body">
+    <h3 class="card-title mb-4">Мои настройки</h3>
+    <form method="post">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control") }}
+        {% for e in form.username.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control") }}
+        {% for e in form.email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.first_name.label(class="form-label") }}
+        {{ form.first_name(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.last_name.label(class="form-label") }}
+        {{ form.last_name(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.phone_number.label(class="form-label") }}
+        {{ form.phone_number(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.avatar_url.label(class="form-label") }}
+        {{ form.avatar_url(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.address.label(class="form-label") }}
+        {{ form.address(class="form-control", rows=3) }}
+      </div>
+
+      <hr>
+
+      <div class="form-check mb-3">
+        {{ form.change_password(class="form-check-input") }}
+        {{ form.change_password.label(class="form-check-label") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control") }}
+        {% for e in form.password.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.confirm.label(class="form-label") }}
+        {{ form.confirm(class="form-control") }}
+        {% for e in form.confirm.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

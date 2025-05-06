@@ -1,12 +1,12 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     SelectField, FieldList, FormField, IntegerField,
-    TextAreaField, SubmitField,
+    TextAreaField, SubmitField, PasswordField,
     StringField, DecimalField, BooleanField
 )
 from wtforms.validators import (
     DataRequired, NumberRange, Length, URL,
-    ValidationError, Regexp, Optional
+    ValidationError, Regexp, Optional, Email, EqualTo
 )
 from app.models.order import ConfigurationType
 from app.models.server import Server
@@ -85,3 +85,18 @@ class CartCheckoutForm(FlaskForm):
         validators=[DataRequired(), Length(max=500)]
     )
     submit = SubmitField('Оформить заказ')
+
+
+class UserSettingsForm(FlaskForm):
+    username = StringField('Имя пользователя', validators=[DataRequired(), Length(3, 64)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    first_name = StringField('Имя', validators=[Optional(), Length(max=30)])
+    last_name = StringField('Фамилия', validators=[Optional(), Length(max=30)])
+    phone_number = StringField('Телефон', validators=[Optional(), Length(max=20)])
+    avatar_url = StringField('URL аватара', validators=[Optional(), URL()])
+    address = TextAreaField('Адрес', validators=[Optional(), Length(max=500)])
+    change_password = BooleanField('Сменить пароль')
+    password = PasswordField('Новый пароль', validators=[Optional(), Length(min=6)])
+    confirm = PasswordField('Повтор пароля',
+                            validators=[Optional(), EqualTo('password', message='Пароли должны совпадать')])
+    submit = SubmitField('Сохранить изменения')
