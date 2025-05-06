@@ -2,11 +2,11 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from app import db
 from app.admin import admin_required
-from app.admin.forms import ServerForm, OrderEditForm, ChatMessageEditForm
+from app.admin.forms import ServerForm, OrderEditForm, ChatMessageEditForm, UserEditForm
 from app.models.chat_message import ChatMessage
 from app.models.server import Server
 from app.models.order import Order, OrderStatus
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.moderator.forms import ChatForm
 
 import json
@@ -185,3 +185,54 @@ def chat_edit(msg_id):
     return redirect(url_for('admin.orders_edit', order_id=msg.order_id))
 
 
+@bp.route('/users/')
+@login_required
+@admin_required
+def users_index():
+    users = User.query.order_by(User.username).all()
+    return render_template('admin/users/index.html', users=users)
+
+@bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def users_edit(user_id):
+    user = User.query.get_or_404(user_id)
+    form = UserEditForm(
+        username=user.username,
+        email=user.email,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        phone_number=user.phone_number,
+        avatar_url=user.avatar_url,
+        address=user.address,
+        role=user.role.name,
+        is_active=user.is_active
+    )
+    if form.validate_on_submit():
+        user.username     = form.username.data
+        user.email        = form.email.data
+        user.first_name   = form.first_name.data
+        user.last_name    = form.last_name.data
+        user.phone_number = form.phone_number.data
+        user.avatar_url   = form.avatar_url.data
+        user.address      = form.address.data
+        user.role         = UserRole[form.role.data]
+        user.is_active    = form.is_active.data
+        db.session.commit()
+        flash('Пользователь сохранён', 'success')
+        return redirect(url_for('admin.users_index'))
+
+    return render_template('admin/users/edit.html', form=form, user=user)
+
+@bp.route('/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def users_delete(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('Нельзя удалить себя', 'danger')
+    else:
+        db.session.delete(user)
+        db.session.commit()
+        flash('Пользователь удалён', 'warning')
+    return redirect(url_for('admin.users_index'))

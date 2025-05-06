@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DecimalField, TextAreaField, BooleanField, SubmitField, SelectField
-from wtforms.validators import DataRequired, Length, URL, NumberRange, Regexp, Optional, ValidationError
+from wtforms.validators import DataRequired, Length, URL, NumberRange, Regexp, Email, Optional, ValidationError
 from app.models.server import Server
 from app.models.order import OrderStatus
+from app.models.user import UserRole
 import json
 
 
@@ -47,3 +48,20 @@ class ChatMessageEditForm(FlaskForm):
     message = TextAreaField('Сообщение', validators=[DataRequired(), Length(max=2000)])
     save = SubmitField('Сохранить')
     delete = SubmitField('Удалить')
+
+
+class UserEditForm(FlaskForm):
+    username = StringField('Имя пользователя', validators=[DataRequired(), Length(3, 64)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    first_name = StringField('Имя', validators=[Optional(), Length(max=30)])
+    last_name = StringField('Фамилия', validators=[Optional(), Length(max=30)])
+    phone_number = StringField('Телефон', validators=[Optional(), Length(max=20)])
+    avatar_url = StringField('URL аватара', validators=[Optional(), URL()])
+    address = TextAreaField('Адрес', validators=[Optional(), Length(max=500)])
+    role = SelectField(
+        'Роль',
+        choices=[(r.name, r.value) for r in UserRole],
+        validators=[DataRequired()]
+    )
+    is_active = BooleanField('Активен')
+    submit = SubmitField('Сохранить изменения')

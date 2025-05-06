@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Пользователи — Админка{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+    <li class="breadcrumb-item active">Пользователи</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+  <h2>Пользователи</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th><th>Логин</th><th>Email</th><th>Роль</th><th>Активен</th><th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role.value }}</td>
+        <td>{{ 'Да' if u.is_active else 'Нет' }}</td>
+        <td>
+          <a href="{{ url_for('admin.users_edit', user_id=u.id) }}"
+             class="btn btn-sm btn-primary">Ред.</a>
+          <form method="post"
+                action="{{ url_for('admin.users_delete', user_id=u.id) }}"
+                style="display:inline"
+                onsubmit="return confirm('Удалить пользователя?');">
+            <button class="btn btn-sm btn-danger">×</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

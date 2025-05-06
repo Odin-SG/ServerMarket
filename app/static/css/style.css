@@ -21,6 +21,10 @@ body.dark .sidebar {
   border: 1px solid #444;
 }
 
+.navbar {
+  z-index: 1030;
+}
+
 body.dark .sidebar a {
   color: var(--text-light);
 }
@@ -97,10 +101,10 @@ p, label {
 
 .sidebar {
   position: fixed;
-  top: 0;
+  top: 56px;
   left: 0;
   width: 220px;
-  height: 100vh;
+  height: calc(100vh - 56px);
   background-color: var(--bg-light);
   padding-top: 1rem;
   border-right: 1px solid #ddd;
@@ -119,6 +123,7 @@ p, label {
 }
 .content-with-sidebar {
   margin-left: 240px;
+  margin-top: 56px
   padding: 1rem;
 }
 

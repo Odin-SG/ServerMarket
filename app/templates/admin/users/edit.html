@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Редактировать пользователя #{{ user.id }}{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.users_index') }}">Пользователи</a></li>
+    <li class="breadcrumb-item active">Редактировать</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+  <h2>Редактировать пользователя №{{ user.id }}</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {% for field in [form.username, form.email, form.first_name, form.last_name,
+                     form.phone_number, form.avatar_url, form.address, form.role, form.is_active] %}
+      <div class="mb-3">
+        {{ field.label(class="form-label") }}
+        {{ field(class="form-control") if field.type!='BooleanField' else field(class="form-check-input") }}
+        {% for err in field.errors %}
+          <div class="text-danger small">{{ err }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <a href="{{ url_for('admin.users_index') }}" class="btn btn-link">Отмена</a>
+  </form>
+{% endblock %}
