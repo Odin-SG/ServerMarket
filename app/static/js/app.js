@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             </div>
             <div class="col-md-6">
+              <p class="mb-3"><em>${data.description}</em></p>
               <p>${
                 data.specifications
                   ? Object.entries(data.specifications)
@@ -29,6 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
                   : ''
               }</p>
               <p class="fs-4"><strong>Цена:</strong> ${data.price.toFixed(2)} ₽</p>
+              <hr>
+              <h5>Статистика продаж</h5>
+              <table class="table table-sm">
+                <tr><td>Всего продано:</td><td>${data.total_sold}</td></tr>
+                <tr><td>Выручка:</td><td>${data.total_revenue.toFixed(2)} ₽</td></tr>
+                <tr><td>Заказов:</td><td>${data.orders_count}</td></tr>
+              </table>
             </div>
           </div>
         `;

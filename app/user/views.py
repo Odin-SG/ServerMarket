@@ -12,6 +12,7 @@ from app.models.order import (
 from app.models.server import Server
 from app.models.chat_message import ChatMessage
 from werkzeug.security import generate_password_hash
+from sqlalchemy import func
 
 
 bp = Blueprint('user', __name__)
@@ -36,12 +37,17 @@ def catalog_detail(slug):
 @bp.route('/servers/<slug>/info')
 def catalog_info(slug):
     server = Server.query.filter_by(slug=slug, is_available=True).first_or_404()
+    stats = get_server_stats(server.id)
     return jsonify({
         'id': server.id,
         'model_name': server.model_name,
+        'description': server.description,
         'price': float(server.price),
         'image_url': server.image_url,
-        'specifications': server.specifications
+        'specifications': server.specifications,
+        'total_sold': stats['total_sold'],
+        'total_revenue': stats['total_revenue'],
+        'orders_count': stats['orders_count'],
     })
 
 
@@ -279,7 +285,6 @@ def settings():
         address=current_user.address
     )
     if form.validate_on_submit():
-        # базовые поля
         current_user.username = form.username.data
         current_user.email = form.email.data
         current_user.first_name = form.first_name.data
@@ -288,7 +293,6 @@ def settings():
         current_user.avatar_url = form.avatar_url.data
         current_user.address = form.address.data
 
-        # смена пароля, если нужно
         if form.change_password.data and form.password.data:
             current_user.password_hash = generate_password_hash(form.password.data)
 
@@ -297,3 +301,17 @@ def settings():
         return redirect(url_for('user.settings'))
 
     return render_template('user/settings.html', form=form)
+
+
+def get_server_stats(server_id):
+    sold = db.session.query(func.coalesce(func.sum(OrderItem.quantity), 0)) \
+        .filter(OrderItem.server_id == server_id).scalar()
+    revenue = db.session.query(func.coalesce(func.sum(OrderItem.quantity * OrderItem.unit_price), 0)) \
+        .filter(OrderItem.server_id == server_id).scalar()
+    orders_count = db.session.query(func.count(func.distinct(OrderItem.order_id))) \
+        .filter(OrderItem.server_id == server_id).scalar()
+    return {
+        'total_sold': int(sold),
+        'total_revenue': float(revenue),
+        'orders_count': int(orders_count),
+    }

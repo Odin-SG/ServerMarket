@@ -104,21 +104,23 @@ def orders_index():
 def orders_edit(order_id):
     order = Order.query.get_or_404(order_id)
 
-    form = OrderEditForm(
-        prefix='order',
-        status=order.status.name,
-        contact_info=order.contact_info.get('text', '')
-    )
+    form = OrderEditForm()
+
+    if not form.is_submitted():
+        form.status.data = order.status.name
+        form.contact_info.data = order.contact_info.get('text', '')
 
     chat_form = ChatForm(prefix='chat')
 
     if request.method == 'POST':
-        if form.validate_on_submit() and form.submit.data:
+        if form.validate_on_submit():
             order.status = OrderStatus[form.status.data]
             order.contact_info = {'text': form.contact_info.data.strip()}
             db.session.commit()
             flash('Заказ обновлён', 'success')
             return redirect(url_for('admin.orders_index'))
+        else:
+            print(form.form_errors)
 
     chat_messages = order.chat_messages.order_by(ChatMessage.created_at).all()
     chat_edit_forms = []
