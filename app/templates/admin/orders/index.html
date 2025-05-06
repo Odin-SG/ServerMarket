@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Все заказы{% endblock %}
 
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Заказы</li>
+    </ol>
+  </nav>
+{% endblock %}
+
 {% block content %}
   <h2>Все заказы</h2>
   <table class="table table-striped">

@@ -24,10 +24,13 @@
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <title>{% block title %}A-STOR Магазин{% endblock %}</title>
   </head>
-  <body>
+  <body class="">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
       <div class="container">
-        <a class="navbar-brand" href="{{ url_for('user.catalog_index') }}">A-STOR</a>
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">A-STOR</a>
+        <button id="themeToggle" class="btn btn-sm btn-outline-light ms-auto">
+          🌙
+        </button>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -87,13 +90,45 @@
         </div>
       </div>
     </nav>
-    <hr>
-    <div class="container">
-      {% for message in get_flashed_messages() %}
-        <div class="alert alert-info">{{ message }}</div>
+    {% if current_user.is_authenticated %}
+      {% if current_user.role.name == 'ADMIN' %}
+        <div class="sidebar">
+          <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('admin.servers_index') }}">Управление серверами</a>
+          <a href="{{ url_for('admin.orders_index') }}">Управление заказами</a>
+          <a href="{{ url_for('admin.users_index') }}">Пользователи</a>
+        </div>
+      {% elif current_user.role.name == 'MODERATOR' %}
+        <div class="sidebar">
+          <a href="{{ url_for('moderator.orders') }}">Заявки (модератор)</a>
+        </div>
+      {% endif %}
+    {% endif %}
+    <div class="container{% if current_user.is_authenticated and current_user.role.name in ['ADMIN', 'MODERATOR'] %} content-with-sidebar{% endif %}">
+      {% for message in get_flashed_messages(with_categories=true) %}
+        <div class="alert alert-{{ message[0] }}" role="alert">
+          {{ message[1] }}
+        </div>
       {% endfor %}
+      {% block breadcrumbs %}{% endblock %}
       {% block content %}{% endblock %}
     </div>
-  {% block scripts %}{% endblock %}
+    <script>
+      const applyTheme = (theme) => {
+        document.body.classList.toggle('dark', theme === 'dark');
+        document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+      };
+
+      const saved = localStorage.getItem('astorTheme') || 'light';
+      applyTheme(saved);
+
+      document.getElementById('themeToggle')?.addEventListener('click', () => {
+        const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
+        localStorage.setItem('astorTheme', newTheme);
+        applyTheme(newTheme);
+      });
+    </script>
+
+    {% block scripts %}{% endblock %}
   </body>
 </html>
