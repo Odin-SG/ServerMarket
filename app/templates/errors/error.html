@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Ошибка {{ code }}{% endblock %}
 {% block content %}
+
   <h1>Ошибка {{ code }}</h1>
   <p>{{ message }}</p>
+<!--
   {% if error_tb %}
     <h2>Трассировка:</h2>
     <pre>{{ error_tb }}</pre>
   {% endif %}
   <a href="{{ url_for('main.index') }}">На главную</a>
+ -->
 {% endblock %}

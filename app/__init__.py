@@ -1,8 +1,8 @@
 import traceback
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
+from flask_login import LoginManager, user_logged_in
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_socketio import SocketIO
@@ -10,6 +10,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from werkzeug.exceptions import HTTPException
+from datetime import datetime
+
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -88,6 +90,47 @@ def create_app(config_class='app.config.Config'):
 
     from app.commands import generate_reports
     app.cli.add_command(generate_reports)
+
+    from app.models.login_stat import LoginStat
+
+    @user_logged_in.connect_via(app)
+    def record_login(sender, user):
+        ip = request.remote_addr or 'unknown'
+        ua = request.user_agent.string[:255]
+        stat = LoginStat.query.filter_by(
+            user_id=user.id,
+            ip_address=ip,
+            user_agent=ua
+        ).first()
+        if stat:
+            stat.visit_count += 1
+            stat.last_seen = datetime.utcnow()
+        else:
+            stat = LoginStat(user_id=user.id, ip_address=ip, user_agent=ua)
+            db.session.add(stat)
+        db.session.commit()
+
+    @app.before_request
+    def record_visit():
+        if request.endpoint and request.endpoint.startswith(('static','socketio','api')):
+            return
+        ip = request.remote_addr or 'unknown'
+        ua = request.user_agent.string[:255]
+        uid = None
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            uid = request.user.id
+        stat = LoginStat.query.filter_by(
+            user_id=uid,
+            ip_address=ip,
+            user_agent=ua
+        ).first()
+        if stat:
+            stat.visit_count += 1
+            stat.last_seen = datetime.utcnow()
+        else:
+            stat = LoginStat(user_id=uid, ip_address=ip, user_agent=ua)
+            db.session.add(stat)
+        db.session.commit()
 
     @app.context_processor
     def inject_user_roles():

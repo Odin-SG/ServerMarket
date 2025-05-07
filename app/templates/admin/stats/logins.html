@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Статистика входов{% endblock %}
+
+{% block content %}
+  <h2>Статистика входов</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Пользователь</th>
+        <th>IP-адрес</th>
+        <th>Браузер</th>
+        <th>Первый визит</th>
+        <th>Последний визит</th>
+        <th>Число визитов</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in stats %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{% if row.user %}{{ row.user.username }}{% else %}—{% endif %}</td>
+        <td>{{ row.ip_address }}</td>
+        <td>{{ row.user_agent }}</td>
+        <td>{{ row.first_seen.strftime('%d.%m.%Y %H:%M') }}</td>
+        <td>{{ row.last_seen.strftime('%d.%m.%Y %H:%M') }}</td>
+        <td>{{ row.visit_count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

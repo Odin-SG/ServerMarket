@@ -105,6 +105,7 @@
           <hr>
           <a href="{{ url_for('admin.reports_users') }}">Отчёты по пользователям</a>
           <a href="{{ url_for('admin.reports_servers') }}">Отчёты по серверам</a>
+          <a href="{{ url_for('admin.login_stats') }}">Статистика входов</a>
         </div>
       {% elif current_user.role.name == 'MODERATOR' %}
         <div class="sidebar">
@@ -138,5 +139,13 @@
     </script>
 
     {% block scripts %}{% endblock %}
-  </body>
+    <footer class="bg-light text-center text-muted py-3 mt-5">
+      <div class="container small">
+        Сделано Лукиным Виктором Андреевичем ·
+        <a href="https://github.com/Odin-SG/ServerMarket" target="_blank" class="text-decoration-none">
+          GitHub репозиторий
+        </a>
+      </div>
+    </footer>
+</body>
 </html>

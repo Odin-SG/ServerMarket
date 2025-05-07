@@ -9,6 +9,7 @@ from app.models.order import Order, OrderStatus
 from app.models.user import User, UserRole
 from app.moderator.forms import ChatForm
 from app.models.report import ReportUser, ReportDataUser, ReportServer, ReportDataServer
+from app.models.login_stat import LoginStat
 import os
 
 import json
@@ -316,3 +317,11 @@ def download_report_server(report_id):
         as_attachment=True,
         download_name=f'server_report_{rpt.server_id}_{rpt.id}.pdf'
     )
+
+
+@bp.route('/stats/logins/')
+@login_required
+@admin_required
+def login_stats():
+    stats = LoginStat.query.order_by(LoginStat.last_seen.desc()).all()
+    return render_template('admin/stats/logins.html', stats=stats)

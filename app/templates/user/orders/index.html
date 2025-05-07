@@ -3,18 +3,34 @@
 
 {% block content %}
   <h2>Мои заказы</h2>
-
   {% if orders %}
-    <ul>
-      {% for order in orders %}
-        <li>
-          <a href="{{ url_for('user.orders_show', order_id=order.id) }}">
-            Заказ №{{ order.id }} ({{ order.status.value }}) —
-            {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Статус</th>
+              <th>Дата</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.status.value }}</td>
+                <td>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>
+                  <a href="{{ url_for('user.orders_show', order_id=order.id) }}"
+                     class="btn btn-sm btn-primary">Подробнее</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   {% else %}
     <p>
       У вас ещё нет ни одного заказа.

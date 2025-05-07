@@ -74,5 +74,25 @@ if __name__ == '__main__':
                 ))
             db.session.commit()
 
+        from werkzeug.security import generate_password_hash
+        from app.models.user import User, UserRole
+
+        if User.query.count() == 0:
+            users = [
+                {'username': 'admin',     'email': 'admin@astor.com',     'role': UserRole.ADMIN},
+                {'username': 'moderator', 'email': 'mod@astor.com',       'role': UserRole.MODERATOR},
+                {'username': 'user',      'email': 'user@astor.com',      'role': UserRole.USER},
+            ]
+            for u in users:
+                pwd = 'password123'
+                db.session.add(User(
+                    username=u['username'],
+                    email=u['email'],
+                    password_hash=generate_password_hash(pwd),
+                    role=u['role']
+                ))
+            db.session.commit()
+            print("Добавлены default-пользователи: admin, moderator, user (пароль password123)")
+
     from app import socketio
     socketio.run(app, host='0.0.0.0', port=5000, debug=app.config['DEBUG'], allow_unsafe_werkzeug=True)
