@@ -65,3 +65,13 @@ class UserEditForm(FlaskForm):
     )
     is_active = BooleanField('Активен')
     submit = SubmitField('Сохранить изменения')
+
+
+class ReportUserForm(FlaskForm):
+    user_id = SelectField(
+        'Пользователь',
+        coerce=int,
+        validators=[DataRequired()],
+        choices=[]
+    )
+    submit = SubmitField('Сформировать отчёт')

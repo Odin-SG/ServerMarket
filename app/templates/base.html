@@ -102,6 +102,8 @@
           <a href="{{ url_for('admin.servers_index') }}">Управление серверами</a>
           <a href="{{ url_for('admin.orders_index') }}">Управление заказами</a>
           <a href="{{ url_for('admin.users_index') }}">Пользователи</a>
+          <hr>
+          <a href="{{ url_for('admin.reports_users') }}">Отчёты по пользователям</a>
         </div>
       {% elif current_user.role.name == 'MODERATOR' %}
         <div class="sidebar">

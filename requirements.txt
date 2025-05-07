@@ -22,3 +22,4 @@ itsdangerous==2.1.2
 PyJWT==2.6.0
 stripe
 bleach
+reportlab

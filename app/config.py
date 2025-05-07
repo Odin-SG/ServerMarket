@@ -21,6 +21,7 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@astor.com')
     ITEMS_PER_PAGE = 10
+    REPORTS_FOLDER = os.path.join(basedir, '..', 'reports')
 
 
 class DevelopmentConfig(Config):

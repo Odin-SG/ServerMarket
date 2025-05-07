@@ -24,6 +24,10 @@ def create_app(config_class='app.config.Config'):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    import os
+    reports_dir = app.config['REPORTS_FOLDER']
+    os.makedirs(reports_dir, exist_ok=True)
+
     talisman.init_app(app,
                       content_security_policy={
                           'default-src': ["'self'"],
@@ -81,6 +85,9 @@ def create_app(config_class='app.config.Config'):
     app.register_blueprint(moderator_bp)
     from app.admin.views import bp as admin_bp
     app.register_blueprint(admin_bp)
+
+    from app.commands import generate_reports
+    app.cli.add_command(generate_reports)
 
     @app.context_processor
     def inject_user_roles():
