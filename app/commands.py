@@ -9,25 +9,21 @@ from reportlab.pdfbase.ttfonts import TTFont
 from sqlalchemy import func
 from app import db
 from app.models.report import ReportUser, ReportDataUser
-from app.models.order import Order
+from app.models.report import ReportServer, ReportDataServer
+from app.models.order import Order, OrderItem
 from app.models.user import User
+from app.models.server import Server
 
 
 @click.command('generate-reports')
 @with_appcontext
 def generate_reports():
-    """
-    Обрабатывает все ReportUser со статусом 'pending':
-     1) Помечает 'processing'
-     2) Считает метрики и заполняет ReportDataUser
-     3) Генерирует PDF
-     4) Помечает 'done' и сохраняет file_path
-    """
     FONT_PATH = os.path.join(os.path.dirname(__file__), 'static', 'fonts', 'arial.ttf')
     pdfmetrics.registerFont(TTFont('Arial', FONT_PATH))
-    pending = ReportUser.query.filter_by(status='pending').all()
-    click.echo(f"Найдено {len(pending)} отчётов в статусе pending")
-    for rpt in pending:
+
+    pending_u = ReportUser.query.filter_by(status='pending').all()
+    click.echo(f"Найдено {len(pending_u)} отчётов по пользователям в статусе pending")
+    for rpt in pending_u:
         click.echo(f"Обрабатываю ReportUser id={rpt.id} для User id={rpt.user_id}")
         try:
             rpt.status = 'processing'
@@ -79,5 +75,54 @@ def generate_reports():
             rpt.status = 'failed'
             db.session.commit()
             click.echo(f"Ошибка при обработке id={rpt.id}: {e}", err=True)
+
+    pending_s = ReportServer.query.filter_by(status='pending').all()
+    click.echo(f"Найдено {len(pending_s)} отчётов по серверам в статусе pending")
+    for rpt in pending_s:
+        click.echo(f"Обрабатываю ReportServer id={rpt.id} для Server id={rpt.server_id}")
+        try:
+            rpt.status = 'processing'
+            db.session.commit()
+
+            sold = db.session.query(
+                func.coalesce(func.sum(OrderItem.quantity), 0)
+            ).filter(OrderItem.server_id == rpt.server_id).scalar() or 0
+            revenue = db.session.query(
+                func.coalesce(func.sum(OrderItem.quantity * OrderItem.unit_price), 0)
+            ).filter(OrderItem.server_id == rpt.server_id).scalar() or 0
+            orders_count = db.session.query(
+                func.count(func.distinct(OrderItem.order_id))
+            ).filter(OrderItem.server_id == rpt.server_id).scalar() or 0
+
+            data = rpt.data or ReportDataServer(report=rpt)
+            data.total_sold = int(sold)
+            data.total_revenue = revenue
+            data.orders_count = int(orders_count)
+            db.session.add(data)
+            db.session.commit()
+
+            filename = f"server_{rpt.server_id}_{rpt.id}.pdf"
+            fullpath = os.path.join(current_app.config['REPORTS_FOLDER'], filename)
+            server = Server.query.get(rpt.server_id)
+            c = canvas.Canvas(fullpath, pagesize=letter)
+            c.setFont("Arial", 14)
+            c.drawString(50, 750, f"Отчёт по серверу: {server.model_name if server else rpt.server_id}")
+            c.setFont("Arial", 12)
+            c.drawString(50, 720, f"Всего продано: {sold}")
+            c.drawString(50, 700, f"Выручка: {revenue:.2f} ₽")
+            c.drawString(50, 680, f"Заказов: {orders_count}")
+            c.showPage()
+            c.save()
+
+            rpt.file_path = filename
+            rpt.status = 'done'
+            db.session.commit()
+            click.echo(f"ReportServer id={rpt.id} готов: {filename}")
+
+        except Exception as e:
+            db.session.rollback()
+            rpt.status = 'failed'
+            db.session.commit()
+            click.echo(f"Ошибка при обработке server rpt id={rpt.id}: {e}", err=True)
 
     click.echo("Генерация отчётов завершена.")

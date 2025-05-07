@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Отчёты по серверам{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+    <li class="breadcrumb-item active">Отчёты по серверам</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+  <h2>Отчёты по конкретному серверу</h2>
+
+  <div class="card mb-4 p-3">
+    <h5>Создать новый отчёт</h5>
+    <form method="post">
+      {{ form.hidden_tag() }}
+      <div class="row g-2 align-items-end">
+        <div class="col-auto">
+          {{ form.server_id.label(class="form-label") }}
+          {{ form.server_id(class="form-select") }}
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <h5>Существующие отчёты</h5>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Сервер</th>
+        <th>Дата запроса</th>
+        <th>Продано штук</th>
+        <th>Выручка</th>
+        <th>Заказы</th>
+        <th>Статус</th>
+        <th>Действие</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rpt in reports %}
+      <tr>
+        <td>{{ rpt.id }}</td>
+        <td>{{ rpt.server.model_name }}</td>
+        <td>{{ rpt.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+        <td>{{ rpt.data.total_sold }}</td>
+        <td>{{ '{:.2f}'.format(rpt.data.total_revenue) }} ₽</td>
+        <td>{{ rpt.data.orders_count }}</td>
+        <td>{{ rpt.status }}</td>
+        <td>
+          {% if rpt.status == 'done' %}
+            <a href="{{ url_for('admin.download_report_server', report_id=rpt.id) }}"
+               class="btn btn-sm btn-success">Скачать PDF</a>
+          {% else %}
+            — ждём
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

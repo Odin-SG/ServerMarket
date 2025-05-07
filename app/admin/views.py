@@ -2,13 +2,13 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required
 from app import db
 from app.admin import admin_required
-from app.admin.forms import ServerForm, OrderEditForm, ChatMessageEditForm, UserEditForm, ReportUserForm
+from app.admin.forms import ServerForm, OrderEditForm, ChatMessageEditForm, UserEditForm, ReportUserForm, ReportServerForm
 from app.models.chat_message import ChatMessage
 from app.models.server import Server
 from app.models.order import Order, OrderStatus
 from app.models.user import User, UserRole
 from app.moderator.forms import ChatForm
-from app.models.report import ReportUser, ReportDataUser
+from app.models.report import ReportUser, ReportDataUser, ReportServer, ReportDataServer
 import os
 
 import json
@@ -278,4 +278,41 @@ def download_report_user(report_id):
         os.path.join(current_app.config['REPORTS_FOLDER'], rpt.file_path),
         as_attachment=True,
         download_name=f'user_report_{rpt.user_id}_{rpt.id}.pdf'
+    )
+
+
+@bp.route('/reports/servers/', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def reports_servers():
+    form = ReportServerForm()
+    form.server_id.choices = [(s.id, s.model_name) for s in Server.query.order_by(Server.model_name)]
+    if form.validate_on_submit():
+        rpt = ReportServer(server_id=form.server_id.data)
+        db.session.add(rpt)
+        rpt.data = ReportDataServer()
+        db.session.commit()
+        flash('Запрос на отчёт по серверу создан.', 'success')
+        return redirect(url_for('admin.reports_servers'))
+
+    reports = ReportServer.query.order_by(ReportServer.created_at.desc()).all()
+    return render_template(
+        'admin/reports/servers.html',
+        form=form,
+        reports=reports
+    )
+
+
+@bp.route('/reports/servers/<int:report_id>/download')
+@login_required
+@admin_required
+def download_report_server(report_id):
+    rpt = ReportServer.query.get_or_404(report_id)
+    if rpt.status != 'done' or not rpt.file_path:
+        flash('Отчёт пока не готов.', 'warning')
+        return redirect(url_for('admin.reports_servers'))
+    return send_file(
+        os.path.join(current_app.config['REPORTS_FOLDER'], rpt.file_path),
+        as_attachment=True,
+        download_name=f'server_report_{rpt.server_id}_{rpt.id}.pdf'
     )

@@ -75,3 +75,13 @@ class ReportUserForm(FlaskForm):
         choices=[]
     )
     submit = SubmitField('Сформировать отчёт')
+
+
+class ReportServerForm(FlaskForm):
+    server_id = SelectField(
+        'Сервер',
+        coerce=int,
+        validators=[DataRequired()],
+        choices=[]
+    )
+    submit = SubmitField('Сформировать отчёт')
