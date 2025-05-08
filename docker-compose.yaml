@@ -1,10 +1,9 @@
+version: '3.8'
 services:
   db:
     image: postgres:14
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: a_stor_shop
+    env_file:
+      - setting.env
     ports:
       - "5432:5432"
     volumes:
@@ -12,57 +11,53 @@ services:
 
   init-db:
     build: .
-    environment:
-      SECRET_KEY: p@ss_t-r*ing
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_NAME: a_stor_shop
-      DATABASE_URL: postgresql://postgres:postgres@db/a_stor_shop
+    env_file:
+      - setting.env
     depends_on:
       - db
+    entrypoint: ["/app/entrypoint.sh"]
     command: >
       bash -c "
-        until pg_isready -h \$DB_HOST -p \$DB_PORT -U \$DB_USER -d \$DB_NAME; do
-          echo 'Waiting for Postgres...'; sleep 2;
-        done;
-        echo 'Creating tables...';
-        python - <<'PYCODE'
-            from app import create_app, db
-            app = create_app()
-            with app.app_context():
-                db.create_all()
-            PYCODE
-        "
+        echo 'Создаём таблицы...';
+        python - << 'PYCODE'
+        from app import create_app, db
+        import os
+        app = create_app(os.getenv('FLASK_CONFIG'))
+        with app.app_context():
+            db.create_all()
+        PYCODE
+      "
 
   web:
     build: .
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_NAME: a_stor_shop
-      DATABASE_URL: postgresql://postgres:postgres@db/a_stor_shop
-      SECRET_KEY: p@ss_t-r*ing
+    env_file:
+      - setting.env
+    depends_on:
+      - init-db
+    entrypoint: ["/app/entrypoint.sh"]
+    command: >
+      gunicorn
+      --bind 0.0.0.0:5000
+      --workers 4
+      --timeout 120
+      run:app
     ports:
       - "5000:5000"
-    depends_on:
-      - db
 
   report-generator:
     build: .
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_NAME: a_stor_shop
-      DATABASE_URL: postgresql://postgres:postgres@db/a_stor_shop
-      FLASK_APP: run.py
-      SECRET_KEY: p@ss_t-r*ing
-    command: >
-      bash -c "while true; do flask generate-reports; sleep 20; done"
+    env_file:
+      - setting.env
     depends_on:
-      - db
+      - init-db
+    entrypoint: ["/app/entrypoint.sh"]
+    command: >
+      bash -c "
+        while true; do
+          flask generate-reports
+          sleep 20
+        done
+      "
 
 volumes:
   postgres_data:
