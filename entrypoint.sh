@@ -1,9 +1,9 @@
-#!/usr/bin/env sh
-flask run --host=0.0.0.0 &
+#!/usr/bin/env bash
+set -euo pipefail
 
-trap "kill %1; exit 0" TERM INT
-
-while true; do
-  flask generate-reports
-  sleep 20
+until psql "$DATABASE_URL" -c '\q' 2>/dev/null; do
+  echo "⏳ Waiting for Postgres..."
+  sleep 2
 done
+
+exec "$@"
