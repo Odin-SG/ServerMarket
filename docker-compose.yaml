@@ -43,6 +43,8 @@ services:
       run:app
     ports:
       - "5000:5000"
+    volumes:
+      - reports_data:/app/reports
 
   report-generator:
     build: .
@@ -58,6 +60,9 @@ services:
           sleep 20
         done
       "
+    volumes:
+      - reports_data:/app/reports
 
 volumes:
   postgres_data:
+  reports_data:
