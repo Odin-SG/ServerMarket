@@ -10,6 +10,30 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  init-db:
+    build: .
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_NAME: a_stor_shop
+      DATABASE_URL: postgresql://postgres:postgres@db/a_stor_shop
+    depends_on:
+      - db
+    command: >
+      bash -c "
+        until pg_isready -h \$DB_HOST -p \$DB_PORT -U \$DB_USER -d \$DB_NAME; do
+          echo 'Waiting for Postgres...'; sleep 2;
+        done;
+        echo 'Creating tables...';
+        python - <<'PYCODE'
+            from app import create_app, db
+            app = create_app()
+            with app.app_context():
+                db.create_all()
+            PYCODE
+        "
+
   web:
     build: .
     environment:
