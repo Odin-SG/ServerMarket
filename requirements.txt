@@ -24,3 +24,5 @@ stripe
 bleach
 reportlab
 blinker
+pytest
+pytest-cov
