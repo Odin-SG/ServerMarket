@@ -1,6 +1,6 @@
 Flask==2.2.3
 Flask-SQLAlchemy==3.0.3
-flask_socketio
+flask_socketio==5.5.1
 Flask-Migrate==4.0.4
 Flask-Login==0.6.2
 Flask-WTF==1.1.1
@@ -26,3 +26,5 @@ reportlab
 blinker
 pytest
 pytest-cov
+gevent>=21.8.0
+gevent-websocket>=0.10.1

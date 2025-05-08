@@ -18,4 +18,4 @@ ENV REPORTS_FOLDER=/app/reports
 ENV DB_HOST=db
 ENV DB_PORT=5432
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "run:app"]
+CMD ["gunicorn", "-k", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "run:app"]

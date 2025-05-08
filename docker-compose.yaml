@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   db:
     image: postgres:14
@@ -18,14 +19,14 @@ services:
     entrypoint: ["/app/entrypoint.sh"]
     command: >
       bash -c "
-        echo 'Создаём таблицы...';
-        python - << 'PYCODE'
-        from app import create_app, db
-        import os
-        app = create_app(os.getenv('FLASK_CONFIG'))
-        with app.app_context():
-            db.create_all()
-        PYCODE
+      echo 'Создаём таблицы...';
+      python - << 'PYCODE'
+      from app import create_app, db
+      import os
+      app = create_app(os.getenv('FLASK_CONFIG'))
+      with app.app_context():
+          db.create_all()
+      PYCODE
       "
 
   web:
@@ -37,9 +38,9 @@ services:
     entrypoint: ["/app/entrypoint.sh"]
     command: >
       gunicorn
+      -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker
+      --workers 1
       --bind 0.0.0.0:5000
-      --workers 4
-      --timeout 120
       run:app
     ports:
       - "5000:5000"
@@ -55,10 +56,10 @@ services:
     entrypoint: ["/app/entrypoint.sh"]
     command: >
       bash -c "
-        while true; do
-          flask generate-reports
-          sleep 20
-        done
+      while true; do
+        flask generate-reports
+        sleep 20
+      done
       "
     volumes:
       - reports_data:/app/reports

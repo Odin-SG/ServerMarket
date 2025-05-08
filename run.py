@@ -1,7 +1,9 @@
 from app import create_app, db
 from app.models.server import Server
+import os
 
-app = create_app('app.config.DevelopmentConfig')
+cfg = os.getenv('FLASK_CONFIG', 'app.config.ProductionConfig')
+app = create_app(cfg)
 
 if __name__ == '__main__':
     with app.app_context():
