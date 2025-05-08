@@ -15,6 +15,7 @@ COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 ENV FLASK_APP=run.py
 ENV FLASK_ENV=production
+ENV SECRET_KEY=p@ss_t-r*ing
 ENV REPORTS_FOLDER=/app/reports
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "run:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "run:app"]
