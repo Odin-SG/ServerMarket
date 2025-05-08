@@ -14,20 +14,7 @@ services:
     build: .
     env_file:
       - setting.env
-    depends_on:
-      - db
-    entrypoint: ["/app/entrypoint.sh"]
-    command: >
-      bash -c "
-      echo 'Создаём таблицы...';
-      python - << 'PYCODE'
-      from app import create_app, db
-      import os
-      app = create_app(os.getenv('FLASK_CONFIG'))
-      with app.app_context():
-          db.create_all()
-      PYCODE
-      "
+    entrypoint: ["/app/entrypoint-init.sh"]
 
   web:
     build: .

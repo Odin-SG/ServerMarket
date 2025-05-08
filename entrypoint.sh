@@ -6,12 +6,16 @@ DB_PORT="${DB_PORT:-5432}"
 DB_USER="${DB_USER:-postgres}"
 DB_NAME="${DB_NAME:-a_stor_shop}"
 
-echo "Ждём Postgres на $DB_HOST:$DB_PORT..."
-
+echo "Ждём, пока Postgres поднимется..."
 until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" >/dev/null 2>&1; do
-  echo "$(date +'%Y-%m-%d %H:%M:%S') ⏳ Waiting for Postgres..."
   sleep 2
 done
 
-echo "Postgres доступен — стартуем: $*"
+echo "Postgres доступен — ждём генерации таблиц…"
+until psql "$DATABASE_URL" -tAc "SELECT 1 FROM servers LIMIT 1" >/dev/null 2>&1; do
+  echo "…schema not ready, sleeping 2s"
+  sleep 2
+done
+
+echo "Схема готова — стартуем: $*"
 exec "$@"
