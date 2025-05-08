@@ -2,7 +2,7 @@ from app import create_app, db
 from app.models.server import Server
 import os
 
-cfg = os.getenv('FLASK_CONFIG', 'app.config.ProductionConfig')
+cfg = os.getenv('FLASK_CONFIG', 'app.config.DevelopmentConfig')
 app = create_app(cfg)
 
 if __name__ == '__main__':
@@ -97,4 +97,4 @@ if __name__ == '__main__':
             print("Добавлены default-пользователи: admin, moderator, user (пароль password123)")
 
     from app import socketio
-    socketio.run(app, host='0.0.0.0', port=5000, debug=app.config['DEBUG'], allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=app.config.get('DEBUG', True), allow_unsafe_werkzeug=True)
