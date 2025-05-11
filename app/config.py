@@ -13,7 +13,7 @@ class Config:
         'DATABASE_URL',
         "postgresql://{user}:{pw}@{host}:{port}/{db}".format(
             user=os.environ.get('POSTGRES_USER', os.environ.get('DB_USER', 'postgres')),
-            pw=os.environ.get('POSTGRES_PASSWORD', 'postgres'),
+            pw=os.environ.get('POSTGRES_PASSWORD', 'harrypotter'),
             host=os.environ.get('DB_HOST', '127.0.0.1'),
             port=os.environ.get('DB_PORT', '5432'),
             db=os.environ.get('POSTGRES_DB', os.environ.get('DB_NAME', 'a_stor_shop'))
