@@ -162,8 +162,7 @@ with app.app_context():
                         "Power Supply": "800 W",
                         "Form Factor": "4U Storage Chassis"
                     },
-                    },
-                    "image_url": "https://cdn.citilink.ru/g0_BwSG1UNgMx5QwHwlM296OQjiLawP9HuG8AHliXec/resizing_type:fit/gravity:sm/width:400/height:400/plain/product-images/d85a8c91-b39a-487f-9ed0-2c57053dddea.jpg",
+                    "image_url": "https://cdn.citilink.ru/g0_BwSG1UNgMx5QwHwlM296OQjiLawP9HuG8AHliXec/resizing_type :fit/gravity:sm/width:400/height:400/plain/product-images/d85a8c91-b39a-487f-9ed0-2c57053dddea.jpg",
                     "is_available": True,
                     "quantity": 3
                 },
