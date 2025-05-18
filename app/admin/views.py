@@ -55,7 +55,7 @@ def servers_new():
             is_available=form.is_available.data,
             image_url=(None if form.use_upload.data else form.image_url.data),
             image_filename=(None),
-            quantity=form.quantity.data
+            quantity=form.quantity.data or 0,
         )
 
         if form.use_upload.data and form.image_file.data:
@@ -63,6 +63,8 @@ def servers_new():
             filename = secure_filename(f.filename)
             f.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
             srv.image_filename = filename
+
+        srv.is_available = form.is_available.data or (srv.quantity > 0)
 
         db.session.add(srv)
         db.session.commit()
@@ -92,6 +94,8 @@ def servers_edit(id):
 
         if form.specifications.data:
             srv.specifications = json.loads(form.specifications.data)
+
+        srv.is_available = form.is_available.data or (srv.quantity > 0)
 
         if form.replace_image.data:
             if form.use_upload.data and form.image_file.data:

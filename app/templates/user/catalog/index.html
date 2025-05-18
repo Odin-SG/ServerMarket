@@ -1,6 +1,16 @@
 {% extends 'base.html' %}
 {% block title %}Каталог серверов{% endblock %}
 
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item active" aria-current="page">
+        Каталог серверов
+      </li>
+    </ol>
+  </nav>
+{% endblock %}
+
 {% block content %}
   <h1>Каталог серверов</h1>
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -47,6 +57,14 @@
             <p class="fs-5 mt-auto">
               <strong>{{ '{:.2f}'.format(server.price) }} ₽</strong>
             </p>
+            <div class="mt-2">
+            <a
+              href="{{ url_for('qa.server_qa', slug=server.slug) }}"
+              class="btn btn-primary w-100 mt-2"
+            >
+              Страница продукта
+            </a>
+            </div>
           </div>
         </div>
       </div>

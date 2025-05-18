@@ -93,36 +93,30 @@ def orders_new():
             sid = request.form.get(f'items-{i}-server_id')
             qty = request.form.get(f'items-{i}-quantity')
             try:
-                sid = int(sid);
+                sid = int(sid)
                 qty = int(qty)
             except (TypeError, ValueError):
                 flash(f'Неверные данные в позиции {i + 1}', 'danger')
                 break
 
             srv = Server.query.filter_by(id=sid).with_for_update().first()
-            if srv.quantity < qty:
-                flash(f'В позиции {i + 1}: на складе осталось только {srv.quantity} штук', 'warning')
-
             if not srv:
                 flash(f'Сервер не найден в позиции {i + 1}', 'danger')
                 break
 
-            if srv.quantity < qty:
-                flash(f'В позиции {i + 1}: на складе осталось только {srv.quantity} штук', 'warning')
-                break
-
-            srv.quantity -= qty
-            if srv.quantity == 0:
-                srv.is_available = False
-
+            items_data.append({'server': srv, 'quantity': qty})
             total += float(srv.price) * qty
-
-            items_data.append({
-                'server_id': srv.id,
-                'quantity': qty,
-                'unit_price': srv.price
-            })
         else:
+            for idx, it in enumerate(items_data):
+                if it['server'].quantity < it['quantity']:
+                    flash(
+                        f'В позиции {idx+1}: на складе осталось только '
+                        f'{it["server"].quantity} штук',
+                        'warning'
+                    )
+                    db.session.rollback()
+                    return redirect(url_for('user.orders_new', configuration=config_name))
+
             order = Order(
                 user_id=current_user.id,
                 configuration=ConfigurationType[config_name],
@@ -130,11 +124,17 @@ def orders_new():
                 total_price=total
             )
             for it in items_data:
+                srv = it['server']
+                srv.quantity -= it['quantity']
+                if srv.quantity == 0:
+                    srv.is_available = False
+
                 order.items.append(OrderItem(
-                    server_id=it['server_id'],
+                    server_id=srv.id,
                     quantity=it['quantity'],
-                    unit_price=it['unit_price']
+                    unit_price=srv.price
                 ))
+
             try:
                 db.session.add(order)
                 db.session.commit()
@@ -146,6 +146,7 @@ def orders_new():
 
     if not form.configuration.data:
         form.configuration.data = ConfigurationType.SOLO.name
+
     return render_template(
         'user/orders/new.html',
         form=form,
@@ -155,6 +156,7 @@ def orders_new():
         contact_info=form.contact_info.data or '',
         config_slots_map_js=config_slots_map_js
     )
+
 
 
 @bp.route('/orders/<int:order_id>')
@@ -339,6 +341,40 @@ def get_server_stats(server_id):
         'total_revenue': float(revenue),
         'orders_count': int(orders_count),
     }
+
+
+@bp.route('/orders/<int:order_id>/cancel', methods=['POST'])
+@login_required
+def orders_cancel(order_id):
+    order = Order.query.get_or_404(order_id)
+    if order.user_id != current_user.id:
+        flash('Нельзя отменить чужой заказ', 'danger')
+    elif order.status != OrderStatus.NEW:
+        flash('Отменить можно только новый заказ', 'warning')
+    else:
+        order.status = OrderStatus.CANCELED
+        db.session.commit()
+        flash('Ваш заказ отменён', 'success')
+    return redirect(url_for('user.orders_show', order_id=order_id))
+
+
+@bp.route('/orders/<int:order_id>/edit-contact', methods=['POST'])
+@login_required
+def orders_edit_contact(order_id):
+    order = Order.query.get_or_404(order_id)
+    if order.user_id != current_user.id:
+        flash('Нельзя изменить чужой заказ', 'danger')
+    elif order.status != OrderStatus.NEW:
+        flash('Контакт можно менять только для нового заказа', 'warning')
+    else:
+        new_contact = request.form.get('contact_info', '').strip()
+        if not new_contact:
+            flash('Контакт не может быть пустым', 'danger')
+        else:
+            order.contact_info = {'text': new_contact}
+            db.session.commit()
+            flash('Контактная информация обновлена', 'success')
+    return redirect(url_for('user.orders_show', order_id=order_id))
 
 
 @bp.route('/reference')

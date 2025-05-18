@@ -22,7 +22,7 @@ class ServerForm(FlaskForm):
     replace_image = BooleanField('Заменить изображение')
     use_upload = BooleanField('  • как файл (если не отмечено — оставляем старое)')
     is_available = BooleanField('В наличии')
-    quantity = IntegerField('Количество на складе', validators=[DataRequired(), NumberRange(min=0)], default=0)
+    quantity = IntegerField('Количество на складе', validators=[Optional(), NumberRange(min=0)], default=1)
     submit = SubmitField('Сохранить')
 
     def validate_slug(self, field):

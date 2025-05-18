@@ -1,8 +1,42 @@
 {% extends 'base.html' %}
-{% block title %}Заказ #{{ order.id }}{% endblock %}
+{% block title %}Детали заказа #{{ order.id }}{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{{ url_for('user.orders_index') }}">Мои заказы</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Заказ #{{ order.id }}
+      </li>
+    </ol>
+  </nav>
+{% endblock %}
 
 {% block content %}
-  <h2>Детали заказа №{{ order.id }}</h2>
+  <h2>Детали заказа #{{ order.id }}</h2>
+
+ {% if order.status.name == 'NEW' %}
+   <div class="mb-3">
+     <form method="post" action="{{ url_for('user.orders_edit_contact', order_id=order.id) }}" class="d-inline-block me-2">
+       <div class="input-group">
+         <input
+           type="text"
+           name="contact_info"
+           value="{{ order.contact_info['text'] }}"
+           class="form-control"
+         >
+         <button class="btn btn-outline-secondary" type="submit">Обновить контакт</button>
+       </div>
+     </form>
+
+     <form method="post" action="{{ url_for('user.orders_cancel', order_id=order.id) }}" class="d-inline-block">
+       <button class="btn btn-outline-danger">Отменить заказ</button>
+     </form>
+   </div>
+ {% endif %}
+
   <p><strong>Статус:</strong> {{ order.status.value }}</p>
   <p><strong>Конфигурация:</strong> {{ order.configuration.value }}</p>
   <p><strong>Создан:</strong> {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</p>

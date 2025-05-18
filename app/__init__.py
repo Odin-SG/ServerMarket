@@ -53,7 +53,8 @@ def create_app(config_class='app.config.Config'):
                               "'self'",
                               'data:',
                               'https://cdn.jsdelivr.net',
-                              'https://i.ebayimg.com'
+                              'https://i.ebayimg.com',
+                              'https://cdn.citilink.ru'
                           ],
                           'connect-src': [
                               "'self'",
@@ -87,6 +88,8 @@ def create_app(config_class='app.config.Config'):
     app.register_blueprint(moderator_bp)
     from app.admin.views import bp as admin_bp
     app.register_blueprint(admin_bp)
+    from app.qa.views import bp as qa_bp
+    app.register_blueprint(qa_bp)
 
     from app.commands import generate_reports
     app.cli.add_command(generate_reports)

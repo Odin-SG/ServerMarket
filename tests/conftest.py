@@ -16,7 +16,7 @@ def app():
     uri = f"sqlite:///{db_path}"
     os.environ['DATABASE_URL'] = uri
 
-    app = create_app('app.config.Config')
+    app = create_app('app.config.TestingConfig')
     app.config.update(
         TESTING=True,
         WTF_CSRF_ENABLED=False,

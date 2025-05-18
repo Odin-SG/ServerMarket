@@ -86,6 +86,9 @@ class CartCheckoutForm(FlaskForm):
     )
     submit = SubmitField('Оформить заказ')
 
+    class Meta:
+        csrf = False
+
 
 class UserSettingsForm(FlaskForm):
     username = StringField('Имя пользователя', validators=[DataRequired(), Length(3, 64)])
@@ -100,3 +103,4 @@ class UserSettingsForm(FlaskForm):
     confirm = PasswordField('Повтор пароля',
                             validators=[Optional(), EqualTo('password', message='Пароли должны совпадать')])
     submit = SubmitField('Сохранить изменения')
+

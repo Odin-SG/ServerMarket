@@ -15,7 +15,7 @@ class Server(db.Model):
     image_url = db.Column(db.String(255), nullable=True)
     image_filename = db.Column(db.String(255), nullable=True)
     is_available = db.Column(db.Boolean, default=True, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False, default=0)
+    quantity = db.Column(db.Integer, nullable=False, default=10)
 
     __table_args__ = (
         CheckConstraint('quantity >= 0', name='server_quantity_non_negative'),
