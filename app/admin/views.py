@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required
 from app import db
 from app.admin import admin_required
-from app.admin.forms import ServerForm, OrderEditForm, ChatMessageEditForm, UserEditForm, ReportUserForm, ReportServerForm
+from app.admin.forms import ServerForm, OrderEditForm, ChatMessageEditForm, UserEditForm, ReportUserForm, \
+    ReportServerForm
 from app.models.chat_message import ChatMessage
 from app.models.server import Server
 from app.models.order import Order, OrderStatus
@@ -11,7 +12,7 @@ from app.moderator.forms import ChatForm
 from app.models.report import ReportUser, ReportDataUser, ReportServer, ReportDataServer
 from app.models.login_stat import LoginStat
 import os
-
+from werkzeug.utils import secure_filename
 import json
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -51,10 +52,19 @@ def servers_new():
             description=form.description.data,
             price=form.price.data,
             specifications=specs,
-            image_url=form.image_url.data,
-            is_available=form.is_available.data
+            is_available=form.is_available.data,
+            image_url=(None if form.use_upload.data else form.image_url.data),
+            image_filename=(None),
+            quantity=form.quantity.data
         )
-        db.session.add(srv);
+
+        if form.use_upload.data and form.image_file.data:
+            f = form.image_file.data
+            filename = secure_filename(f.filename)
+            f.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            srv.image_filename = filename
+
+        db.session.add(srv)
         db.session.commit()
         flash('Сервер добавлен', 'success')
         return redirect(url_for('admin.servers_index'))
@@ -73,12 +83,31 @@ def servers_edit(id):
         form.specifications.data = json.dumps(srv.specifications or {}, ensure_ascii=False, indent=2)
 
     if form.validate_on_submit():
-        form.populate_obj(srv)
+        srv.model_name = form.model_name.data
+        srv.slug = form.slug.data
+        srv.description = form.description.data
+        srv.price = form.price.data
+        srv.quantity = form.quantity.data
+        srv.is_available = form.is_available.data
+
         if form.specifications.data:
             srv.specifications = json.loads(form.specifications.data)
+
+        if form.replace_image.data:
+            if form.use_upload.data and form.image_file.data:
+                f = form.image_file.data
+                filename = secure_filename(f.filename)
+                f.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+                srv.image_filename = filename
+                srv.image_url = None
+            elif not form.use_upload.data:
+                srv.image_url = form.image_url.data or None
+                srv.image_filename = None
+
         db.session.commit()
         flash('Сервер обновлён', 'success')
         return redirect(url_for('admin.servers_index'))
+
     return render_template('admin/servers/form.html', form=form, action='Редактировать')
 
 

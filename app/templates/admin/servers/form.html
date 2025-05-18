@@ -4,7 +4,7 @@
 {% block content %}
   <h2>{{ action }} сервер</h2>
 
-  <form method="post" id="server-form">
+  <form method="post" id="server-form" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
 
     <div class="mb-3">
@@ -19,7 +19,7 @@
       {{ form.slug.label(class="form-label") }}
       {{ form.slug(class="form-control") }}
       <small class="form-text text-muted">
-        Slug — это человеко читаемый идентификатор ресурса, который используется в URL для формирования понятных адресов страниц
+        Slug — это человеко-читаемый идентификатор ресурса для формирования понятного URL
       </small>
       {% for err in form.slug.errors %}
         <div class="text-danger small">{{ err }}</div>
@@ -45,9 +45,7 @@
     <div class="mb-3">
       {{ form.specifications.label(class="form-label") }}
       {{ form.specifications(class="form-control", rows=4, id="specifications") }}
-      <small id="json-error" class="text-danger" style="display:none;">
-        Неверный JSON!
-      </small>
+      <small id="json-error" class="text-danger" style="display:none;">Неверный JSON!</small>
       <div class="mt-2">
         <button type="button" class="btn btn-secondary btn-sm" id="format-json">
           Форматировать JSON
@@ -59,6 +57,28 @@
     </div>
 
     <div class="mb-3">
+      {{ form.quantity.label(class="form-label") }}
+      {{ form.quantity(class="form-control") }}
+      {% for err in form.quantity.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    {% if action == 'Редактировать' %}
+      <div class="form-check mb-3">
+        {{ form.replace_image(class="form-check-input", id="replaceImage") }}
+        <label for="replaceImage" class="form-check-label">Заменить изображение</label>
+      </div>
+    {% endif %}
+
+    <div class="mb-3 form-check ms-3">
+      {{ form.use_upload(class="form-check-input", id="useUpload") }}
+      <label for="useUpload" class="form-check-label">
+        Загрузить изображение как файл
+      </label>
+    </div>
+
+    <div class="mb-3" id="url-field">
       {{ form.image_url.label(class="form-label") }}
       {{ form.image_url(class="form-control") }}
       {% for err in form.image_url.errors %}
@@ -66,15 +86,16 @@
       {% endfor %}
     </div>
 
-    <div class="form-check mb-3">
-      {{ form.is_available(class="form-check-input") }}
-      {{ form.is_available.label(class="form-check-label") }}
+    <div class="mb-3" id="file-field" style="display:none;">
+      {{ form.image_file.label(class="form-label") }}
+      {{ form.image_file(class="form-control") }}
+      {% for err in form.image_file.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
     </div>
 
     <button type="submit" class="btn btn-primary" id="submit-btn">{{ action }}</button>
-    <a href="{{ url_for('admin.servers_index') }}" class="btn btn-link">
-      Отменить
-    </a>
+    <a href="{{ url_for('admin.servers_index') }}" class="btn btn-link">Отменить</a>
   </form>
 
   <script>
@@ -83,8 +104,12 @@
       const errMsg = document.getElementById('json-error');
       const submit = document.getElementById('submit-btn');
       const fmtBtn = document.getElementById('format-json');
+      const useUpload = document.getElementById('useUpload');
+      const urlField  = document.getElementById('url-field');
+      const fileField = document.getElementById('file-field');
+      const replaceImage = document.getElementById('replaceImage');
 
-      function validate() {
+      function validateJSON() {
         const v = ta.value.trim();
         if (!v) {
           errMsg.style.display = 'none';
@@ -95,26 +120,49 @@
           JSON.parse(v);
           errMsg.style.display = 'none';
           submit.disabled = false;
-        } catch (e) {
+        } catch {
           errMsg.style.display = 'block';
           submit.disabled = true;
         }
       }
 
-      fmtBtn.addEventListener('click', function() {
+      fmtBtn.addEventListener('click', () => {
         try {
           const obj = JSON.parse(ta.value);
           ta.value = JSON.stringify(obj, null, 2);
           errMsg.style.display = 'none';
           submit.disabled = false;
-        } catch (e) {
+        } catch {
           errMsg.textContent = 'Невалидный JSON, форматировать нечего.';
           errMsg.style.display = 'block';
         }
       });
 
-      ta.addEventListener('input', validate);
-      document.addEventListener('DOMContentLoaded', validate);
+      function toggleImageFields() {
+        if (replaceImage && !replaceImage.checked) {
+          urlField.style.display  = 'none';
+          fileField.style.display = 'none';
+          return;
+        }
+        if (useUpload.checked) {
+          urlField.style.display  = 'none';
+          fileField.style.display = 'block';
+        } else {
+          urlField.style.display  = 'block';
+          fileField.style.display = 'none';
+        }
+      }
+
+      ta.addEventListener('input', validateJSON);
+      useUpload.addEventListener('change', toggleImageFields);
+      if (replaceImage) {
+        replaceImage.addEventListener('change', toggleImageFields);
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        validateJSON();
+        toggleImageFields();
+      });
     })();
   </script>
 {% endblock %}

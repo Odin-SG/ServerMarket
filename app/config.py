@@ -9,11 +9,14 @@ class Config:
     DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
     SESSION_COOKIE_SECURE = not DEBUG
     REMEMBER_COOKIE_SECURE = not DEBUG
+    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+    MAX_CONTENT_LENGTH = 30 * 1024 * 1024
+    ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL',
         "postgresql://{user}:{pw}@{host}:{port}/{db}".format(
             user=os.environ.get('POSTGRES_USER', os.environ.get('DB_USER', 'postgres')),
-            pw=os.environ.get('POSTGRES_PASSWORD', 'harrypotter'),
+            pw=os.environ.get('POSTGRES_PASSWORD', 'postgres'),
             host=os.environ.get('DB_HOST', '127.0.0.1'),
             port=os.environ.get('DB_PORT', '5432'),
             db=os.environ.get('POSTGRES_DB', os.environ.get('DB_NAME', 'a_stor_shop'))

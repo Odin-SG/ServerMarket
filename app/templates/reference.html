@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Справка и информация{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Справка по проекту ServerMarketV2</h1>
+
+  <section class="mb-5">
+    <h2>Автор и руководитель</h2>
+    <p>Выполнил: ЛУКИН ВИКТОР АНДРЕЕВИЧ</p>
+    <p>Группа: з.ИЗДтс 23.1/Б2-21</p>
+  </section>
+
+  <section class="mb-5">
+    <h2>Цель и задачи проекта</h2>
+    <ul>
+      <li>Разработка веб-приложения для каталога и продажи серверного оборудования.</li>
+      <li>Автоматизация оформления заказов и управления складскими остатками.</li>
+      <li>Реализация ролей пользователей: Администратор, Модератор, Пользователь.</li>
+      <li>Генерация PDF-отчётов по пользователям и по серверам.</li>
+      <li>Обеспечение безопасности и удобного интерфейса.</li>
+    </ul>
+  </section>
+
+  <section class="mb-5">
+    <h2>Стек технологий</h2>
+    <ul>
+      <li><strong>Язык программирования:</strong> Python 3.10+</li>
+      <li><strong>Веб-фреймворк:</strong> Flask</li>
+      <li><strong>ORM:</strong> SQLAlchemy + Flask-Migrate (Alembic)</li>
+      <li><strong>СУБД:</strong> PostgreSQL 14</li>
+      <li><strong>Контейнеризация:</strong> Docker &amp; Docker Compose</li>
+      <li><strong>Асинхронность:</strong> Flask-SocketIO (для чата и уведомлений в реальном времени)</li>
+      <li><strong>Аутентификация:</strong> Flask-Login + JWT (для API)</li>
+      <li><strong>Формы и валидация:</strong> Flask-WTF + WTForms</li>
+      <li><strong>Генерация PDF:</strong> ReportLab</li>
+      <li><strong>Шаблонизация:</strong> Jinja2, Bootstrap 5 (CSS/JS), AJAX (Fetch API)</li>
+      <li><strong>Тестирование:</strong> pytest, Flask-Testing, SQLite (для CI)</li>
+      <li><strong>Статика и загрузки:</strong> Flask’s static, WTForms FileField, uploads/</li>
+    </ul>
+  </section>
+
+  <section class="mb-5">
+    <h2>Архитектура приложения</h2>
+    <ol>
+      <li><strong>Blueprints:</strong>
+        <ul>
+          <li><code>main</code> — публичная часть (каталог серверов).</li>
+          <li><code>user</code> — функционал клиента (корзина, заказы, профиль).</li>
+          <li><code>moderator</code> — управление заказами, чат.</li>
+          <li><code>admin</code> — CRUD по серверам, пользователям, отчётам, статистика.</li>
+        </ul>
+      </li>
+      <li><strong>Модель данных:</strong> User, Server, Order, OrderItem, ChatMessage, ReportUser/ReportServer, LoginStat.</li>
+      <li><strong>API:</strong> JSON-эндпоинты для деталей сервера, корзины и заказов.</li>
+      <li><strong>Роуты и роли:</strong> разграничение доступа через <code>@login_required</code> и <code>@admin_required</code>.</li>
+    </ol>
+  </section>
+
+  <section class="mb-5">
+    <h2>Основные функции</h2>
+    <ul>
+      <li>Добавление и редактирование серверов (с выбором URL или загрузкой файла изображения).</li>
+      <li>Управление складскими остатками и флагом «в наличии».</li>
+      <li>Оформление заказов напрямую или через корзину с учётом доступного количества.</li>
+      <li>Реализация ролей с разными правами (USER, MODERATOR, ADMIN).</li>
+      <li>Онлайн-чат внутри заказов (SocketIO).</li>
+      <li>Генерация и скачивание PDF-отчётов.</li>
+      <li>Валидация JSON для характеристик серверов (CodeMirror + клиентская/серверная проверка).</li>
+      <li>Система уведомлений (флеш-сообщения и тосты).</li>
+    </ul>
+  </section>
+
+  <p class="text-muted">
+    Дата сборки: {{ current_year }}
+  </p>
+{% endblock %}

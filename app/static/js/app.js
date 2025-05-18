@@ -10,25 +10,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
 
         document.getElementById('serverModalLabel').textContent = data.model_name;
-        const body = document.getElementById('modalBody');
-        body.innerHTML = `
+
+        const imgHtml = data.image_filename
+          ? `<img src="/static/uploads/${data.image_filename}" class="img-fluid" alt="${data.model_name}">`
+          : (data.image_url
+              ? `<img src="${data.image_url}" class="img-fluid" alt="${data.model_name}">`
+              : '');
+
+        const specsHtml = data.specifications
+          ? Object.entries(data.specifications)
+              .map(([k, v]) => `<strong>${k}:</strong> ${v}<br>`)
+              .join('')
+          : '';
+
+        document.getElementById('modalBody').innerHTML = `
           <div class="row">
             <div class="col-md-6">
-              ${
-                data.image_url
-                  ? `<img src="${data.image_url}" class="img-fluid" alt="${data.model_name}">`
-                  : ''
-              }
+              ${imgHtml}
             </div>
             <div class="col-md-6">
               <p class="mb-3"><em>${data.description}</em></p>
-              <p>${
-                data.specifications
-                  ? Object.entries(data.specifications)
-                      .map(([k, v]) => `<strong>${k}:</strong> ${v}<br>`)
-                      .join('')
-                  : ''
-              }</p>
+              <p>${specsHtml}</p>
               <p class="fs-4"><strong>Цена:</strong> ${data.price.toFixed(2)} ₽</p>
               <hr>
               <h5>Статистика продаж</h5>
@@ -38,8 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <tr><td>Заказов:</td><td>${data.orders_count}</td></tr>
               </table>
             </div>
-          </div>
-        `;
+          </div>`;
         serverModal.show();
       } catch (e) {
         console.error(e);

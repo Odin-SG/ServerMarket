@@ -13,7 +13,7 @@ from app.models.server import Server
 from app.models.chat_message import ChatMessage
 from werkzeug.security import generate_password_hash
 from sqlalchemy import func
-
+from datetime import datetime
 
 bp = Blueprint('user', __name__)
 
@@ -44,6 +44,7 @@ def catalog_info(slug):
         'description': server.description,
         'price': float(server.price),
         'image_url': server.image_url,
+        'image_filename': server.image_filename,
         'specifications': server.specifications,
         'total_sold': stats['total_sold'],
         'total_revenue': stats['total_revenue'],
@@ -338,3 +339,8 @@ def get_server_stats(server_id):
         'total_revenue': float(revenue),
         'orders_count': int(orders_count),
     }
+
+
+@bp.route('/reference')
+def reference():
+    return render_template('reference.html', current_year=datetime.utcnow().year)

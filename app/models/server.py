@@ -13,6 +13,7 @@ class Server(db.Model):
     price = db.Column(db.Numeric(12, 2), nullable=False)
     specifications = db.Column(JSON, nullable=True)
     image_url = db.Column(db.String(255), nullable=True)
+    image_filename = db.Column(db.String(255), nullable=True)
     is_available = db.Column(db.Boolean, default=True, nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=0)
 

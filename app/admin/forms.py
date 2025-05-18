@@ -1,11 +1,14 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DecimalField, TextAreaField, BooleanField, SubmitField, SelectField
+from wtforms import StringField, DecimalField, TextAreaField, BooleanField, SubmitField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, URL, NumberRange, Regexp, Email, Optional, ValidationError
+from flask_wtf.file import FileField
 from app.models.server import Server
 from app.models.order import OrderStatus
 from app.models.user import UserRole
+from flask import current_app
 import json
 
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 class ServerForm(FlaskForm):
     model_name = StringField('Модель', validators=[DataRequired(), Length(3, 100)])
@@ -14,7 +17,12 @@ class ServerForm(FlaskForm):
     price = DecimalField('Цена', validators=[DataRequired(), NumberRange(min=0)], places=2)
     specifications = TextAreaField('Характеристики (JSON)', validators=[Length(max=2000)])
     image_url = StringField('URL изображения', validators=[Optional(), URL()])
+    image_file = FileField('Файл изображения')
+    use_upload = BooleanField('Загрузить изображение с компьютера')
+    replace_image = BooleanField('Заменить изображение')
+    use_upload = BooleanField('  • как файл (если не отмечено — оставляем старое)')
     is_available = BooleanField('В наличии')
+    quantity = IntegerField('Количество на складе', validators=[DataRequired(), NumberRange(min=0)], default=0)
     submit = SubmitField('Сохранить')
 
     def validate_slug(self, field):
@@ -29,6 +37,15 @@ class ServerForm(FlaskForm):
                 json.loads(field.data)
             except:
                 raise ValidationError('Неверный JSON')
+
+    def validate_image_url(self, field):
+        if self.replace_image.data and not self.use_upload.data and not field.data:
+            raise ValidationError('Укажите новый URL или загрузите файл.')
+
+    def validate_image_file(self, field):
+        if self.replace_image.data and self.use_upload.data:
+            if not field.data or not getattr(field.data, 'filename', None):
+                raise ValidationError('Загрузите файл изображения.')
 
 
 class OrderEditForm(FlaskForm):

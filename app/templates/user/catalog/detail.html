@@ -3,13 +3,21 @@
 
 {% block content %}
   <h1>{{ server.model_name }}</h1>
-  {% if server.image_url %}
+
+  {% if server.image_filename %}
+    <img
+      src="{{ url_for('static', filename='uploads/' ~ server.image_filename) }}"
+      alt="{{ server.model_name }}"
+      class="img-fluid mb-3"
+    >
+  {% elif server.image_url %}
     <img
       src="{{ server.image_url }}"
       alt="{{ server.model_name }}"
-      width="300"
+      class="img-fluid mb-3"
     >
   {% endif %}
+
   <p>{{ server.description }}</p>
 
   <h3>Характеристики</h3>
@@ -32,7 +40,7 @@
     <button class="btn btn-secondary" disabled>Нет на складе</button>
   {% endif %}
 
-  <p>
+  <p class="mt-3">
     <a href="{{ url_for('user.catalog_index') }}">
       ← Вернуться к каталогу
     </a>

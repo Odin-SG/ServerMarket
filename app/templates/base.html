@@ -40,7 +40,7 @@
               <a class="nav-link" href="{{ url_for('user.catalog_index') }}">Сервера</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('user.orders_new') }}">Конфигурации</a>
+              <a class="nav-link" href="{{ url_for('user.orders_new') }}">Кластерные конфигурации</a>
             </li>
             {% if current_user.is_authenticated and current_user.role == UserRole.MODERATOR %}
               <li class="nav-item">
@@ -91,6 +91,14 @@
                 <a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a>
               </li>
             {% endif %}
+              <li class="nav-item dropdown">
+               <a class="nav-link dropdown-toggle" href="#" id="infoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                 Информация
+               </a>
+               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="infoDropdown">
+                 <li><a class="dropdown-item" href="{{ url_for('user.reference') }}">Справка</a></li>
+               </ul>
+              </li>
           </ul>
         </div>
       </div>

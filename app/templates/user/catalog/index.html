@@ -8,7 +8,13 @@
       <div class="col">
         <div class="card h-100 shadow-sm {% if server.quantity == 0 %}opacity-50{% endif %}">
           <div class="position-relative overflow-hidden">
-            {% if server.image_url %}
+            {% if server.image_filename %}
+              <img
+                src="{{ url_for('static', filename='uploads/' ~ server.image_filename) }}"
+                class="card-img-top"
+                alt="{{ server.model_name }}"
+              >
+            {% elif server.image_url %}
               <img
                 src="{{ server.image_url }}"
                 class="card-img-top"
