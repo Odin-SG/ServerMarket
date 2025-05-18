@@ -4,7 +4,7 @@
 {% block content %}
   <h2>{{ action }} сервер</h2>
 
-  <form method="post">
+  <form method="post" id="server-form">
     {{ form.hidden_tag() }}
 
     <div class="mb-3">
@@ -18,6 +18,9 @@
     <div class="mb-3">
       {{ form.slug.label(class="form-label") }}
       {{ form.slug(class="form-control") }}
+      <small class="form-text text-muted">
+        Slug — это человеко читаемый идентификатор ресурса, который используется в URL для формирования понятных адресов страниц
+      </small>
       {% for err in form.slug.errors %}
         <div class="text-danger small">{{ err }}</div>
       {% endfor %}
@@ -41,7 +44,15 @@
 
     <div class="mb-3">
       {{ form.specifications.label(class="form-label") }}
-      {{ form.specifications(class="form-control", rows=4) }}
+      {{ form.specifications(class="form-control", rows=4, id="specifications") }}
+      <small id="json-error" class="text-danger" style="display:none;">
+        Неверный JSON!
+      </small>
+      <div class="mt-2">
+        <button type="button" class="btn btn-secondary btn-sm" id="format-json">
+          Форматировать JSON
+        </button>
+      </div>
       {% for err in form.specifications.errors %}
         <div class="text-danger small">{{ err }}</div>
       {% endfor %}
@@ -60,9 +71,50 @@
       {{ form.is_available.label(class="form-check-label") }}
     </div>
 
-    <button type="submit" class="btn btn-primary">{{ action }}</button>
+    <button type="submit" class="btn btn-primary" id="submit-btn">{{ action }}</button>
     <a href="{{ url_for('admin.servers_index') }}" class="btn btn-link">
       Отменить
     </a>
   </form>
+
+  <script>
+    (function() {
+      const ta     = document.getElementById('specifications');
+      const errMsg = document.getElementById('json-error');
+      const submit = document.getElementById('submit-btn');
+      const fmtBtn = document.getElementById('format-json');
+
+      function validate() {
+        const v = ta.value.trim();
+        if (!v) {
+          errMsg.style.display = 'none';
+          submit.disabled = false;
+          return;
+        }
+        try {
+          JSON.parse(v);
+          errMsg.style.display = 'none';
+          submit.disabled = false;
+        } catch (e) {
+          errMsg.style.display = 'block';
+          submit.disabled = true;
+        }
+      }
+
+      fmtBtn.addEventListener('click', function() {
+        try {
+          const obj = JSON.parse(ta.value);
+          ta.value = JSON.stringify(obj, null, 2);
+          errMsg.style.display = 'none';
+          submit.disabled = false;
+        } catch (e) {
+          errMsg.textContent = 'Невалидный JSON, форматировать нечего.';
+          errMsg.style.display = 'block';
+        }
+      });
+
+      ta.addEventListener('input', validate);
+      document.addEventListener('DOMContentLoaded', validate);
+    })();
+  </script>
 {% endblock %}

@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import CheckConstraint
 from app import db
 
 class Server(db.Model):
@@ -13,6 +14,11 @@ class Server(db.Model):
     specifications = db.Column(JSON, nullable=True)
     image_url = db.Column(db.String(255), nullable=True)
     is_available = db.Column(db.Boolean, default=True, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=0)
+
+    __table_args__ = (
+        CheckConstraint('quantity >= 0', name='server_quantity_non_negative'),
+    )
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(

@@ -8,6 +8,14 @@
 
     <div class="mb-3">
       <label for="configuration" class="form-label">Конфигурация</label>
+        <p>Конфигурация - это один из готовых наборов объединения серверов в кластер. Существует 4 возможных варианта:</p>
+        <ul>
+          <li><strong>SOLO</strong> - один сервер на выбор, с предварительно настроенной виртуализацией и кластеризацией посредством кубернетиса</li>
+          <li><strong>Small</strong> - 2 сервера</li>
+          <li><strong>Medium</strong> - 4 сервера</li>
+          <li><strong>Large</strong> - 8 серверов</li>
+        </ul>
+        <p>Остальные конфигурации подразумевают уже физическую кластеризацию, где сервер монолитен, а кластеризация происходит посредством физических средств коммуникации, специальных драйверов и ПО.</p>
       <select name="configuration" id="configuration" class="form-select">
         {% for name, label in config_choices %}
           <option

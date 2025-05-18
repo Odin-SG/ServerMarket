@@ -22,7 +22,8 @@ if __name__ == '__main__':
                         "Storage": "2 × 1 TB SATA"
                     },
                     "image_url": "https://i.ebayimg.com/images/g/nS0AAOSw8ZFgEfGJ/s-l640.jpg",
-                    "is_available": True
+                    "is_available": True,
+                    "quantity": 10
                 },
                 {
                     "model_name": "ASTOR Pro",
@@ -35,7 +36,8 @@ if __name__ == '__main__':
                         "Storage": "4 × 1 TB SAS"
                     },
                     "image_url": "https://i.ebayimg.com/images/g/Fk8AAeSwtWFoE4CE/s-l1600.webp",
-                    "is_available": True
+                    "is_available": True,
+                    "quantity": 5
                 },
                 {
                     "model_name": "ASTOR Ultra",
@@ -48,7 +50,8 @@ if __name__ == '__main__':
                         "Storage": "2 × 1 TB NVMe"
                     },
                     "image_url": "https://i.ebayimg.com/images/g/dC0AAeSwEcloE3~w/s-l1600.webp",
-                    "is_available": True
+                    "is_available": True,
+                    "quantity": 2
                 },
                 {
                     "model_name": "ASTOR Max",
@@ -61,7 +64,8 @@ if __name__ == '__main__':
                         "Storage": "8 × 1 TB NVMe"
                     },
                     "image_url": "https://i.ebayimg.com/images/g/qLUAAOSwB0tnrgsI/s-l1600.webp",
-                    "is_available": True
+                    "is_available": True,
+                    "quantity": 1
                 },
             ]
             for srv in default_servers:
@@ -72,7 +76,8 @@ if __name__ == '__main__':
                     price=srv["price"],
                     specifications=srv["specifications"],
                     image_url=srv["image_url"],
-                    is_available=srv["is_available"]
+                    is_available=srv["is_available"],
+                    quantity=srv["quantity"]
                 ))
             db.session.commit()
 
@@ -81,9 +86,9 @@ if __name__ == '__main__':
 
         if User.query.count() == 0:
             users = [
-                {'username': 'admin',     'email': 'admin@astor.com',     'role': UserRole.ADMIN},
-                {'username': 'moderator', 'email': 'mod@astor.com',       'role': UserRole.MODERATOR},
-                {'username': 'user',      'email': 'user@astor.com',      'role': UserRole.USER},
+                {'username': 'admin', 'email': 'admin@astor.com', 'role': UserRole.ADMIN},
+                {'username': 'moderator', 'email': 'mod@astor.com', 'role': UserRole.MODERATOR},
+                {'username': 'user', 'email': 'user@astor.com', 'role': UserRole.USER},
             ]
             for u in users:
                 pwd = 'password123'
@@ -97,4 +102,10 @@ if __name__ == '__main__':
             print("Добавлены default-пользователи: admin, moderator, user (пароль password123)")
 
     from app import socketio
-    socketio.run(app, host='0.0.0.0', port=5000, debug=app.config.get('DEBUG', True), allow_unsafe_werkzeug=True)
+    socketio.run(
+        app,
+        host='0.0.0.0',
+        port=5000,
+        debug=app.config.get('DEBUG', True),
+        allow_unsafe_werkzeug=True
+    )

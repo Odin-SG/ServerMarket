@@ -21,15 +21,15 @@
 
   <p><strong>Цена:</strong> {{ '{:.2f}'.format(server.price) }} ₽</p>
 
-  {% if server.is_available %}
-    <a
-      href="{{ url_for('user.orders_new') }}?server_id={{ server.id }}"
-      class="btn btn-primary"
-    >
-      Заказать
-    </a>
+  {% if server.quantity > 0 %}
+    <form method="get" action="{{ url_for('user.orders_new') }}" class="d-inline-block">
+      <input type="hidden" name="server_id" value="{{ server.id }}">
+      <button type="submit" class="btn btn-primary">
+        Заказать (макс {{ server.quantity }})
+      </button>
+    </form>
   {% else %}
-    <p>Нет в наличии</p>
+    <button class="btn btn-secondary" disabled>Нет на складе</button>
   {% endif %}
 
   <p>

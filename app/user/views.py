@@ -36,7 +36,7 @@ def catalog_detail(slug):
 
 @bp.route('/servers/<slug>/info')
 def catalog_info(slug):
-    server = Server.query.filter_by(slug=slug, is_available=True).first_or_404()
+    server = Server.query.filter_by(slug=slug).first_or_404()
     stats = get_server_stats(server.id)
     return jsonify({
         'id': server.id,
@@ -48,6 +48,7 @@ def catalog_info(slug):
         'total_sold': stats['total_sold'],
         'total_revenue': stats['total_revenue'],
         'orders_count': stats['orders_count'],
+        'quantity': server.quantity
     })
 
 
@@ -97,12 +98,24 @@ def orders_new():
                 flash(f'Неверные данные в позиции {i + 1}', 'danger')
                 break
 
-            srv = Server.query.get(sid)
+            srv = Server.query.filter_by(id=sid).with_for_update().first()
+            if srv.quantity < qty:
+                flash(f'В позиции {i + 1}: на складе осталось только {srv.quantity} штук', 'warning')
+
             if not srv:
                 flash(f'Сервер не найден в позиции {i + 1}', 'danger')
                 break
 
+            if srv.quantity < qty:
+                flash(f'В позиции {i + 1}: на складе осталось только {srv.quantity} штук', 'warning')
+                break
+
+            srv.quantity -= qty
+            if srv.quantity == 0:
+                srv.is_available = False
+
             total += float(srv.price) * qty
+
             items_data.append({
                 'server_id': srv.id,
                 'quantity': qty,
@@ -249,8 +262,18 @@ def cart_checkout():
             total_price=total
         )
         for it in items:
+            srv = Server.query.filter_by(id=it['server'].id).with_for_update().first()
+            if srv.quantity < it['quantity']:
+                flash(f'Недостаточно на складе: {srv.model_name}', 'warning')
+                db.session.rollback()
+                return redirect(url_for('user.cart_view'))
+
+            srv.quantity -= it['quantity']
+            if srv.quantity == 0:
+                srv.is_available = False
+
             order.items.append(OrderItem(
-                server_id=it['server'].id,
+                server_id=srv.id,
                 quantity=it['quantity'],
                 unit_price=it['unit_price']
             ))

@@ -73,6 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addToCart = async function(serverId) {
+    const btn = document.querySelector(`.add-to-cart-btn[data-id="${serverId}"]`);
+    const maxQty = parseInt(btn.dataset.max, 10);
+
     try {
       const res = await fetch("/cart/add", {
         method: 'POST',
@@ -89,15 +92,20 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Не удалось добавить в корзину', 'danger');
         return;
       }
+
       document.getElementById('cartCount').textContent = data.cart_count;
       showToast('Добавлено в корзину', 'success');
+
+      if (!isNaN(maxQty) && data.cart_count >= maxQty) {
+        btn.disabled = true;
+        btn.textContent = 'Нет на складе';
+      }
 
     } catch (e) {
       console.error(e);
       showToast('Ошибка при добавлении в корзину', 'danger');
     }
   };
-
 
   function showToast(message, type) {
     const toast = document.createElement('div');
